@@ -1,15 +1,24 @@
-# Elysia with Bun runtime
+# [FOSWLY] VOT Backend
 
-## Getting Started
-To get started with this template, simply paste this command into your terminal:
+Сервер для расширения списка поддерживаемых сайтов для voice-over-translation.
+
+## Установка:
+
+1. Разверните сервер media-converter-backend. Необходимо для конвертации файлов
+2. Разверните сервер translate-Backend. Необходимо для перевода текста без ограничений
+3. Установите PostgreSQL 16+
+4. Установите Redis 6.2.0+
+5. Создайте S3 хранилище у любого провайдера или разверните локально с помощью Minio
+6. Установите Bun
+7. Установите зависимости с помощью команды
+
 ```bash
-bun create elysia ./elysia-example
+bun install
 ```
 
-## Development
-To start the development server run:
-```bash
-bun run dev
-```
+8. Создайте и заполните .env файл
+9. Запустите сервер
 
-Open http://localhost:3000/ with your browser to see the result.
+## Примечание:
+
+1. Если у вас заблокирован какой-либо из сервисов, то гарантировать работоспособность я не могу
