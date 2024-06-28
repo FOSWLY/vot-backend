@@ -1,4 +1,7 @@
-export type TranslatedService = "patreon" | "reddit" | "unknown";
+import { Translation } from "../schemas/translation";
+
+export const translatedServices = ["mux", "reddit", "kodik"] as const;
+export type TranslatedService = (typeof translatedServices)[number];
 export type TranslationStatus = "success" | "waiting" | "parted" | "failed";
 export type TranslationProvider = "yandex";
 export type TranslationFromLang =
@@ -18,7 +21,8 @@ export type TranslationFromLang =
 export type TranslationToLang = "ru" | "en" | "kk";
 
 export type TranslationJobOpts = {
-  service: Exclude<TranslatedService, "unknown">;
+  oldTranslation: null | Translation;
+  service: TranslatedService;
   videoId: string;
   fromLang: TranslationFromLang;
   toLang: TranslationToLang;
