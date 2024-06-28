@@ -1,35 +1,27 @@
-import { supportedService } from "../types/extractor";
-import { MissingRawVideoField, UnSupportedVideoLink, VideoFileCouldntFound } from "../errors";
+import { TranslatedService } from "../types/translation";
+import { MissingRawVideoField, UnSupportedVideoLink } from "../errors";
 import MediaConverterService from "../services/mediaConverter";
-import PatreonAPI from "../external/patreon";
 
-export default async function extractVideo(
-  service: supportedService,
-  videoId: string | number,
-  rawVideo: string = "",
-) {
+const serviceCDNs: Partial<Record<TranslatedService, string>> = {
+  mux: "stream.mux.com",
+  reddit: "v.redd.it",
+  kodik: "cloud.kodik-storage.com",
+};
+
+export default async function extractVideo(service: TranslatedService, rawVideo: string = "") {
+  if (!rawVideo) {
+    throw new MissingRawVideoField(service);
+  }
+
   switch (service) {
-    case "patreon": {
-      const postData = await PatreonAPI.getPosts(videoId);
-
-      if (!postData?.data?.attributes?.post_file?.url) {
-        throw new VideoFileCouldntFound();
-      }
-
-      const {
-        data: {
-          attributes: { post_file },
-        },
-      } = postData;
-
-      return await MediaConverterService.convert(post_file.url, "m3u8-mp4");
-    }
+    case "mux":
+    case "kodik":
     case "reddit": {
-      if (!rawVideo) {
-        throw new MissingRawVideoField(service);
-      }
-
-      if (!rawVideo.startsWith("https://v.redd.it") && rawVideo.includes(".m3u8")) {
+      const url = new URL(rawVideo);
+      if (
+        !url.hostname.endsWith(serviceCDNs[service] as string) ||
+        !url.pathname.includes(".m3u8")
+      ) {
         throw new UnSupportedVideoLink();
       }
 
