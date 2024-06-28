@@ -11,7 +11,6 @@ export default {
     name: "[FOSWLY] VOT Backend",
     desc: "",
     version,
-    publicPath: path.join(__dirname, "..", "public"),
     scalarCDN: "https://unpkg.com/@scalar/api-reference@1.15.1/dist/browser/standalone.js",
   },
   logging: {
@@ -34,11 +33,15 @@ export default {
     port: Bun.env.POSTGRES_PORT ?? 5432,
     user: Bun.env.POSTGRES_USER ?? "postgres",
     password: Bun.env.POSTGRES_PASSWORD ?? "postgres",
+    outdateAfter: 604_800_000, // in ms
   },
   redis: {
     host: Bun.env.REDIS_HOST ?? "127.0.0.1",
     port: Bun.env.REDIS_PORT ?? 6379,
+    username: Bun.env.REDIS_USER ?? "default",
     password: Bun.env.REDIS_PASSWORD ?? "",
+    prefix: Bun.env.REDIS_PREFIX ?? "votb", // Only for DB caching. BullMQ uses other prefix!
+    ttl: Bun.env.REDIS_TTL ?? 7200, // Only for DB caching. BullMQ uses own impl
   },
   s3: {
     region: Bun.env.S3_REGION ?? "ru-central1", // if you use other s3 provider change this region
@@ -48,7 +51,6 @@ export default {
     secretAccessKey: Bun.env.S3_SECRET_ACCESS_KEY ?? "",
   },
   downloaders: {
-    bannedChars: ["\\", "/", ":", "*", "?", '"', "<", ">", "|"],
     userAgent:
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 YaBrowser/24.4.0.0 Safari/537.36",
   },
