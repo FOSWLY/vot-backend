@@ -1,5 +1,5 @@
 import VOTClient, { YandexType } from "vot.js";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv7 } from "uuid";
 import { Job } from "bullmq";
 
 import config from "../config";
@@ -8,11 +8,14 @@ import TranslateTextService from "../services/translateText";
 
 import { log } from "../setup";
 import { saveAudio } from "../s3/save";
-import { createTranslation, updateTranslation } from "../database/repositories/translation";
+import TranslationFacade from "../facades/translation";
 import { FailedExtractVideo } from "../errors";
-import { TranslateTextSuccessResponse } from "../types/services";
+import {
+  MediaConverterFailedResponse,
+  MediaConverterSuccessResponse,
+  TranslateTextSuccessResponse,
+} from "../types/services";
 import { TranslationJobOpts, TranslationProgress } from "../types/translation";
-import { normalizeVideoId } from "../libs/utils";
 
 export default abstract class TranslationJob {
   static s3prefix = "vtrans";
@@ -75,7 +78,7 @@ export default abstract class TranslationJob {
       const blob = await res.arrayBuffer();
       const uint8arr = new Uint8Array(blob as ArrayBuffer);
 
-      const path = `${TranslationJob.s3prefix}/${service}/${uuidv4()}.mp3`;
+      const path = `${TranslationJob.s3prefix}/${service}/${uuidv7()}.mp3`;
       const s3result = await saveAudio(path, uint8arr);
       if (!s3result.success) {
         throw new Error(`Failed to upload audio to s3 bucket. Possible error: ${s3result.message}`);
@@ -89,35 +92,41 @@ export default abstract class TranslationJob {
   }
 
   static async processor(job: Job<TranslationJobOpts>) {
-    const { service, videoId, fromLang, toLang, provider, rawVideo } = job.data;
-    await createTranslation({
+    const { oldTranslation, service, videoId, fromLang, toLang, provider, rawVideo } = job.data;
+    const getBy = {
       service,
       video_id: videoId,
-      status: "waiting",
       provider,
       lang_from: fromLang,
       lang_to: toLang,
-    });
+    };
+
+    const translationFacade = new TranslationFacade();
+    if (oldTranslation) {
+      await translationFacade.delete(getBy);
+    }
+
+    await translationFacade.create({ ...getBy, status: "waiting" });
 
     await job.updateProgress(TranslationProgress.VIDEO_PROCESSING);
 
-    const mediaRes = await extractVideo(service, videoId, rawVideo);
-    if (!mediaRes) {
+    const mediaRes = await extractVideo(service, rawVideo);
+    if (!mediaRes || (mediaRes as MediaConverterFailedResponse).error) {
       throw new FailedExtractVideo();
     }
 
     await job.updateProgress(TranslationProgress.WAIT_TRANSLATION);
-
-    // const outAudioPath = `${service}/${normalizeVideoId(videoId)}.mp3`;
-    // console.log(outAudioPath);
-
     const client = new VOTClient({
       requestLang: fromLang,
       responseLang: toLang,
     });
 
     // в случае ошибки сразу падает в onError, поэтому обрабатывать не надо
-    const translateRes = await TranslationJob.translateVideoImpl(client, job, mediaRes.url);
+    const translateRes = await TranslationJob.translateVideoImpl(
+      client,
+      job,
+      (mediaRes as MediaConverterSuccessResponse).url,
+    );
     await job.updateProgress(TranslationProgress.DOWNLOAD_TRANSLATION);
 
     const path = await TranslationJob.uploadTranslatedAudio(
@@ -129,12 +138,15 @@ export default abstract class TranslationJob {
       throw new Error("Failed to upload translated audio");
     }
 
-    await updateTranslation(service, videoId, provider, fromLang, toLang, {
-      status: "success",
-      remaining_time: null,
-      message: "",
-      translated_url: `${config.s3.endpoint}/${config.s3.bucket}/${path}`,
-    });
+    await translationFacade.update(
+      { service, video_id: videoId, provider, lang_from: fromLang, lang_to: toLang },
+      {
+        status: "success",
+        remaining_time: null,
+        message: "",
+        translated_url: `${config.s3.endpoint}/${config.s3.bucket}/${path}`,
+      },
+    );
   }
 
   static async onProgress(job: Job<TranslationJobOpts>, progress: number | object) {
@@ -145,11 +157,14 @@ export default abstract class TranslationJob {
     let message =
       TranslationJob.messageByProgress[progress as TranslationProgress] ?? "Выполняем перевод";
 
-    await updateTranslation(service, videoId, provider, fromLang, toLang, {
-      status: "waiting",
-      remaining_time: remainingTime,
-      message,
-    });
+    await new TranslationFacade().update(
+      { service, video_id: videoId, provider, lang_from: fromLang, lang_to: toLang },
+      {
+        status: "waiting",
+        remaining_time: remainingTime,
+        message,
+      },
+    );
   }
 
   static async onFailed(job: Job<TranslationJobOpts> | undefined, error: Error) {
@@ -160,17 +175,21 @@ export default abstract class TranslationJob {
     }
 
     const { service, videoId, fromLang, toLang, provider } = job.data;
+    // в бд храним только русские сообщения
     const translateRes = await TranslateTextService.translate(message, "en-ru");
     const translatedMessage =
       translateRes && Object.hasOwn(translateRes, "text")
         ? (translateRes as TranslateTextSuccessResponse).text[0]
         : message;
 
-    await updateTranslation(service, videoId, provider, fromLang, toLang, {
-      status: "failed",
-      remaining_time: null,
-      message: translatedMessage,
-    });
+    await new TranslationFacade().update(
+      { service, video_id: videoId, provider, lang_from: fromLang, lang_to: toLang },
+      {
+        status: "failed",
+        remaining_time: null,
+        message: translatedMessage,
+      },
+    );
   }
 
   static async onCompleted(job: Job, returnValue: any) {

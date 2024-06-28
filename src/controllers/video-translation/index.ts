@@ -1,19 +1,30 @@
 import { Elysia } from "elysia";
 
 import { videoTranslationModels } from "../../models/translation.model";
-import { findTranslation } from "../../database/repositories/translation";
 import { translationQueue } from "../../worker";
-import { Translation } from "../../database/schemas/translation";
+import { Translation } from "../../schemas/translation";
+import TranslationFacade from "../../facades/translation";
+import config from "../../config";
 
 export default new Elysia().group("/video-translation", (app) =>
   app.use(videoTranslationModels).post(
     "/translate",
     async ({ body: { service, videoId, fromLang, toLang, provider, rawVideo } }) => {
       const video_id = videoId.toString();
-      const translation = await findTranslation(service, video_id, provider, fromLang, toLang);
+      const translation = await new TranslationFacade().get({
+        service,
+        video_id,
+        provider,
+        lang_from: fromLang,
+        lang_to: toLang,
+      });
 
       const translationStatus = String(translation?.status);
-      if (["failed", "success"].includes(translationStatus)) {
+      const isOutdated =
+        translation?.created_at && translationStatus !== "success"
+          ? new Date(translation.created_at).getTime() + config.db.outdateAfter < Date.now()
+          : false;
+      if (translationStatus === "success" || (translationStatus === "failed" && !isOutdated)) {
         const { id, provider, translated_url, created_at, message } = translation as Translation;
         return {
           id,
@@ -25,10 +36,11 @@ export default new Elysia().group("/video-translation", (app) =>
         };
       }
 
-      if (!translation) {
+      if (!translation || isOutdated) {
         await translationQueue.add(
           `translation (${provider} ${videoId} ${fromLang} ${toLang})`,
           {
+            oldTranslation: translation,
             service,
             videoId: video_id,
             fromLang,
@@ -44,6 +56,10 @@ export default new Elysia().group("/video-translation", (app) =>
             removeOnFail: true,
           },
         );
+      }
+
+      if (translation && isOutdated) {
+        translation.message = null;
       }
 
       return {
