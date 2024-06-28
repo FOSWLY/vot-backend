@@ -4,8 +4,8 @@
 
 ## Установка:
 
-1. Разверните сервер media-converter-backend. Необходимо для конвертации файлов
-2. Разверните сервер translate-Backend. Необходимо для перевода текста без ограничений
+1. Разверните сервер [media-converter-backend](https://github.com/FOSWLY/media-converter-backend). Необходимо для конвертации файлов
+2. Разверните сервер [translate-Backend](https://github.com/FOSWLY/translate-backend). Необходимо для перевода текста без ограничений
 3. Установите PostgreSQL 16+
 4. Установите Redis 6.2.0+
 5. Создайте S3 хранилище у любого провайдера или разверните локально с помощью Minio
