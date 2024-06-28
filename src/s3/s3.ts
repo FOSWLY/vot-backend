@@ -1,5 +1,4 @@
-import { S3Client, ListBucketsCommand } from "@aws-sdk/client-s3";
-// import { S3Client } from "@bradenmacdonald/s3-lite-client";
+import { S3Client } from "@aws-sdk/client-s3";
 import config from "../config";
 
 export default new S3Client({

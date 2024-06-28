@@ -16,6 +16,7 @@ export async function saveAudio(filename: string, body: Uint8Array) {
       }),
     );
 
+    // add get signed url
     log.info(`Successfully created ${filename} and uploaded it to ${bucket} bucket`);
     return {
       statusCode: results.$metadata.httpStatusCode,
