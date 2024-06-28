@@ -1,4 +1,4 @@
-import { supportedService } from "./types/extractor";
+import { TranslatedService } from "./types/translation";
 
 export class UnAuthorizedError extends Error {
   constructor(unknownToken: boolean = false) {
@@ -12,14 +12,8 @@ export class InternalServerError extends Error {
   }
 }
 
-export class VideoFileCouldntFound extends Error {
-  constructor() {
-    super("The video file couldn't be found");
-  }
-}
-
 export class MissingRawVideoField extends Error {
-  constructor(service: supportedService) {
+  constructor(service: TranslatedService) {
     super(`To translate videos from ${service}, you must specify the "rawVideo" field`);
   }
 }

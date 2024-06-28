@@ -1,10 +1,7 @@
-import { Elysia } from "elysia";
-import { swagger } from "@elysiajs/swagger";
-import { staticPlugin } from "@elysiajs/static";
-
 import * as fs from "fs";
 
-import { mkdir } from "node:fs/promises";
+import { Elysia } from "elysia";
+import { swagger } from "@elysiajs/swagger";
 
 import config from "./config";
 
@@ -14,7 +11,6 @@ import setupElysia, { log } from "./setup";
 import {
   InternalServerError,
   UnAuthorizedError,
-  VideoFileCouldntFound,
   MissingRawVideoField,
   UnSupportedVideoLink,
   FailedExtractVideo,
@@ -22,7 +18,7 @@ import {
 import { HttpStatusCode } from "elysia-http-status-code";
 
 if (!fs.existsSync(config.logging.logPath)) {
-  await mkdir(config.logging.logPath, { recursive: true });
+  fs.mkdirSync(config.logging.logPath, { recursive: true });
   log.info(`Created log directory`);
 }
 
@@ -41,15 +37,9 @@ const app = new Elysia({ prefix: "/v1" })
   )
   .use(setupElysia)
   .use(HttpStatusCode())
-  // .use(
-  //   staticPlugin({
-  //     alwaysStatic: false,
-  //   }),
-  // )
   .error({
     UNAUTHORIZED_ERROR: UnAuthorizedError,
     INTERNAL_SERVER_ERROR: InternalServerError,
-    VIDEO_FILE_COULDNT_FOUND: VideoFileCouldntFound,
     MISSING_RAW_VIDEO_FIELD: MissingRawVideoField,
     UNSUPPORTED_VIDEO_LINK: UnSupportedVideoLink,
     FAILED_EXTRACT_VIDEO: FailedExtractVideo,
@@ -68,7 +58,6 @@ const app = new Elysia({ prefix: "/v1" })
       case "UNAUTHORIZED_ERROR":
         set.status = httpStatus.HTTP_401_UNAUTHORIZED;
         break;
-      case "VIDEO_FILE_COULDNT_FOUND":
       case "UNSUPPORTED_VIDEO_LINK":
         set.status = httpStatus.HTTP_400_BAD_REQUEST;
         break;
