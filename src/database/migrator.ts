@@ -33,7 +33,8 @@ async function migrate() {
   });
 
   if (error) {
-    log.error("Failed to migrate\n", error);
+    log.error("Failed to migrate");
+    log.error(error);
     process.exit(1);
   }
 

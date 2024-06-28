@@ -2,7 +2,7 @@ import { Pool } from "pg";
 import { Kysely, PostgresDialect } from "kysely";
 
 import config from "../config";
-import { Database } from "./schemas/index";
+import { Database } from "./schema";
 import { log } from "../setup";
 
 const dialect = new PostgresDialect({
