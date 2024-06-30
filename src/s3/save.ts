@@ -1,7 +1,7 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 import s3client from "./s3";
-import { log } from "../setup";
+import { log } from "../logging";
 import config from "../config";
 
 export async function saveAudio(filename: string, body: Uint8Array) {

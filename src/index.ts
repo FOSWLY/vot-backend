@@ -7,7 +7,7 @@ import config from "./config";
 
 import healthController from "./controllers/health";
 import videoTranslation from "./controllers/video-translation";
-import { log } from "./setup";
+import { log } from "./logging";
 import {
   InternalServerError,
   UnAuthorizedError,
