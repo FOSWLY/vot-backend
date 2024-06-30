@@ -49,7 +49,6 @@ export default class TranslationFacade extends BaseFacade<
       lang_from: updateWith.lang_from ?? getBy.lang_from,
       lang_to: updateWith.lang_to ?? getBy.lang_to,
     });
-    log.info(result);
     if (!result) {
       await this.cacheRepository.delete(getBy);
       return false;

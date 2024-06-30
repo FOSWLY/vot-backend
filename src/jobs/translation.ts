@@ -45,7 +45,7 @@ export default abstract class TranslationJob {
     });
 
     if (res.translated && res.remainingTime < 1) {
-      log.debug("Translation finished with this data: ", res);
+      log.debug(res, "Translation finished with this data: ");
       return res;
     }
 
@@ -150,7 +150,7 @@ export default abstract class TranslationJob {
   }
 
   static async onProgress(job: Job<TranslationJobOpts>, progress: number | object) {
-    log.info(`Job ${job.id} progressed to ${progress}`, job.data);
+    log.info(job.data, `Job ${job.id} progressed to ${progress}`);
 
     const { service, videoId, fromLang, toLang, provider, remainingTime } = job.data;
 

@@ -15,8 +15,12 @@ export default {
   },
   logging: {
     level: LoggerLevel.DEBUG,
-    logRequests: false, // for debugging (true/false)
     logPath: path.join(__dirname, "..", "logs"),
+    loki: {
+      host: Bun.env.LOKI_HOST ?? "",
+      user: Bun.env.LOKI_USER ?? "",
+      password: Bun.env.LOKI_PASSWORD ?? "",
+    },
   },
   services: {
     mediaConverter: {

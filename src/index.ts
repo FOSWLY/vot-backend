@@ -7,7 +7,7 @@ import config from "./config";
 
 import healthController from "./controllers/health";
 import videoTranslation from "./controllers/video-translation";
-import setupElysia, { log } from "./setup";
+import { log } from "./setup";
 import {
   InternalServerError,
   UnAuthorizedError,
@@ -35,7 +35,6 @@ const app = new Elysia({ prefix: "/v1" })
       },
     }),
   )
-  .use(setupElysia)
   .use(HttpStatusCode())
   .error({
     UNAUTHORIZED_ERROR: UnAuthorizedError,
