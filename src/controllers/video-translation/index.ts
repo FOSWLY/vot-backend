@@ -5,6 +5,7 @@ import { translationQueue } from "../../worker";
 import { Translation } from "../../schemas/translation";
 import TranslationFacade from "../../facades/translation";
 import config from "../../config";
+import { generatePreSigned } from "../../s3/save";
 
 export default new Elysia().group("/video-translation", (app) =>
   app.use(videoTranslationModels).post(
@@ -26,11 +27,14 @@ export default new Elysia().group("/video-translation", (app) =>
           : false;
       if (translationStatus === "success" || (translationStatus === "failed" && !isOutdated)) {
         const { id, provider, translated_url, created_at, message } = translation as Translation;
+        const translatedUrl = translated_url
+          ? await generatePreSigned(translated_url)
+          : translated_url;
         return {
           id,
           status: translationStatus,
           provider,
-          translatedUrl: translated_url,
+          translatedUrl: translatedUrl,
           message,
           createdAt: created_at,
         };

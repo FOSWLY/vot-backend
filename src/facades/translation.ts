@@ -6,7 +6,6 @@ import {
   Translation,
   TranslationUpdate,
 } from "../schemas/translation";
-import { log } from "../logging";
 import BaseFacade from "./base";
 
 export default class TranslationFacade extends BaseFacade<

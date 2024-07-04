@@ -33,6 +33,7 @@ export default abstract class TranslationJob {
     timer: ReturnType<typeof setTimeout> | undefined = undefined,
     translationHelp: YandexType.TranslationHelp[] | null = null,
   ): Promise<YandexType.VideoTranslationResponse> {
+    log.info("test translate");
     clearTimeout(timer);
     const res = await client.translateVideo({
       url,
@@ -144,7 +145,7 @@ export default abstract class TranslationJob {
         status: "success",
         remaining_time: null,
         message: "",
-        translated_url: `${config.s3.endpoint}/${config.s3.bucket}/${path}`,
+        translated_url: path,
       },
     );
   }
