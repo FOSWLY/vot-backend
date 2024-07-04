@@ -17,5 +17,9 @@ declare module "bun" {
     S3_BUCKET: string;
     S3_ACCESS_KEY_ID: string;
     S3_SECRET_ACCESS_KEY: string;
+    LOKI_HOST: string;
+    LOKI_USER: string;
+    LOKI_PASSWORD: string;
+    NODE_ENV: string;
   }
 }
