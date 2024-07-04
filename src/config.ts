@@ -1,5 +1,6 @@
 import * as path from "node:path";
-import { LoggerLevel } from "./types/logging";
+import { type Level } from "pino";
+
 import { version } from "../package.json";
 
 export default {
@@ -11,10 +12,13 @@ export default {
     name: "[FOSWLY] VOT Backend",
     desc: "",
     version,
+    license: "MIT",
+    github_url: "https://github.com/FOSWLY/vot-backend",
+    contact_email: "me@toil.cc",
     scalarCDN: "https://unpkg.com/@scalar/api-reference@1.15.1/dist/browser/standalone.js",
   },
   logging: {
-    level: LoggerLevel.DEBUG,
+    level: (Bun.env.NODE_ENV === "production" ? "info" : "debug") as Level,
     logPath: path.join(__dirname, "..", "logs"),
     loki: {
       host: Bun.env.LOKI_HOST ?? "",
@@ -25,7 +29,7 @@ export default {
   services: {
     mediaConverter: {
       hostname: Bun.env.MEDIA_CONVERTER_HOSTNAME ?? "http://127.0.0.1:3001",
-      token: Bun.env.MEDIA_CONVERTER_TOKEN ?? "x",
+      token: Bun.env.MEDIA_CONVERTER_TOKEN ?? "",
     },
     translateText: {
       hostname: Bun.env.TRANSLATE_TEXT_HOSTNAME ?? "http://127.0.0.1:3313",

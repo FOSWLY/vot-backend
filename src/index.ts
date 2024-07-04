@@ -31,6 +31,14 @@ const app = new Elysia({ prefix: "/v1" })
         info: {
           title: config.app.name,
           version: config.app.version,
+          license: {
+            name: config.app.license,
+          },
+          contact: {
+            name: "Developer",
+            url: config.app.github_url,
+            email: config.app.contact_email,
+          },
         },
       },
     }),
