@@ -33,7 +33,6 @@ export default abstract class TranslationJob {
     timer: ReturnType<typeof setTimeout> | undefined = undefined,
     translationHelp: YandexType.TranslationHelp[] | null = null,
   ): Promise<YandexType.VideoTranslationResponse> {
-    log.info("test translate");
     clearTimeout(timer);
     const res = await client.translateVideo({
       url,
