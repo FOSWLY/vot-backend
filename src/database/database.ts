@@ -20,19 +20,24 @@ export const db = new Kysely<Database>({
   dialect,
   log(event) {
     if (event.level === "error") {
-      log.error("Query failed : ", {
-        durationMs: event.queryDurationMillis,
-        error: event.error,
-        sql: event.query.sql,
-        params: event.query.parameters,
-      });
+      log.error(
+        {
+          durationMs: event.queryDurationMillis,
+          error: event.error,
+          sql: event.query.sql,
+          params: event.query.parameters,
+        },
+        "Query failed!",
+      );
     } else {
-      // `'query'`
-      log.debug("Query executed : ", {
-        durationMs: event.queryDurationMillis,
-        sql: event.query.sql,
-        params: event.query.parameters,
-      });
+      log.debug(
+        {
+          durationMs: event.queryDurationMillis,
+          sql: event.query.sql,
+          params: event.query.parameters,
+        },
+        "Query executed",
+      );
     }
   },
 });

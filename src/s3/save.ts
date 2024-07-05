@@ -27,8 +27,10 @@ export async function saveAudio(filename: string, body: Uint8Array) {
     };
   } catch (err: any) {
     log.error(
+      {
+        err: err.message,
+      },
       `Failed to save audio file (${filename}) to s3 bucket ${config.s3.bucket}`,
-      err.message,
     );
     return {
       success: false,
