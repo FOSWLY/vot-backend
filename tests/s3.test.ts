@@ -8,7 +8,7 @@ test("Audio uploading", async () => {
 });
 
 test("Get pre signed", async () => {
-  const res = await generatePreSigned("vtrans/reddit/1e4d582c-00c0-4353-8d83-d3f01d66bef8.mp3");
+  const res = await generatePreSigned("vtrans/test/ae9b4d2f-abb2-421a-b2b3-4caf8fd0ed5f.mp3");
   console.log(res);
   expect(res).not.toEqual(null);
 });
