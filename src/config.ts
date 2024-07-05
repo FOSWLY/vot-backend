@@ -43,7 +43,7 @@ export default {
   },
   db: {
     name: Bun.env.POSTGRES_NAME ?? "vot-backend",
-    host: Bun.env.POSTGRESQL_HOST ?? "127.0.0.1",
+    host: Bun.env.POSTGRES_HOST ?? "127.0.0.1",
     port: Bun.env.POSTGRES_PORT ?? 5432,
     user: Bun.env.POSTGRES_USER ?? "postgres",
     password: Bun.env.POSTGRES_PASSWORD ?? "postgres",
