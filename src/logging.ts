@@ -48,7 +48,7 @@ if (loki.host) {
     options: {
       batching: true,
       interval: 5,
-      labels: { application: "media-converter-backend" },
+      labels: { application: "vot-backend" },
       host: loki.host,
       basicAuth:
         loki.user && loki.password
