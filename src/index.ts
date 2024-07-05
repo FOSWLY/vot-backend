@@ -51,6 +51,11 @@ const app = new Elysia({ prefix: "/v1" })
     UNSUPPORTED_VIDEO_LINK: UnSupportedVideoLink,
     FAILED_EXTRACT_VIDEO: FailedExtractVideo,
   })
+  .onRequest(({ set }) => {
+    for (const [key, val] of Object.entries(config.cors)) {
+      set.headers[key] = val;
+    }
+  })
   .onError(({ set, code, error, httpStatus }) => {
     switch (code) {
       case "NOT_FOUND":

@@ -17,6 +17,12 @@ export default {
     contact_email: "me@toil.cc",
     scalarCDN: "https://unpkg.com/@scalar/api-reference@1.15.1/dist/browser/standalone.js",
   },
+  cors: {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "*",
+    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+    "Access-Control-Max-Age": "86400",
+  },
   logging: {
     level: (Bun.env.NODE_ENV === "production" ? "info" : "debug") as Level,
     logPath: path.join(__dirname, "..", "logs"),
