@@ -16,6 +16,7 @@ import {
   TranslateTextSuccessResponse,
 } from "../types/services";
 import { TranslationJobOpts, TranslationProgress } from "../types/translation";
+import { fetchWithTimeout } from "../libs/network";
 
 export default abstract class TranslationJob {
   static s3prefix = "vtrans";
@@ -69,10 +70,11 @@ export default abstract class TranslationJob {
 
   static async uploadTranslatedAudio(url: string, service: string) {
     try {
-      const res = await fetch(url, {
+      const res = await fetchWithTimeout(url, {
         headers: {
           "User-Agent": config.downloaders.userAgent,
         },
+        timeout: 30_000,
       });
 
       const blob = await res.arrayBuffer();
