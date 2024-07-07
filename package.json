@@ -8,7 +8,7 @@
     "migrate:up": "bun run migrate",
     "migrate:down": "MIGRATOR_ACTION=downgrade bun run src/database/migrator.ts",
     "s3:disable-cors": "bun scripts/disable-cors.ts",
-    "lint": "bunx oxlint && bunx eslint",
+    "lint": "bunx oxlint --ignore-path=.oxlintignore && bunx eslint",
     "prepare": "husky"
   },
   "dependencies": {
