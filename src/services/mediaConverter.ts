@@ -22,7 +22,7 @@ export default class MediaConverterService {
         },
       });
 
-      return await res.json();
+      return (await res.json()) as MediaConverterResponse;
     } catch (err) {
       console.error(`Failed to convert ${url}`, err);
       return null;

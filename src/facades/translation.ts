@@ -24,7 +24,7 @@ export default class TranslationFacade extends BaseFacade<
 
     const result = (await this.dbRepository.get(getBy)) as Translation | undefined;
     if (result) {
-      await this.cacheRepository.create(result as Translation);
+      await this.cacheRepository.create(result);
     }
 
     return result;
@@ -80,7 +80,7 @@ export default class TranslationFacade extends BaseFacade<
       return;
     }
 
-    const { service, video_id, provider, lang_from, lang_to } = result;
+    const { service, video_id, provider, lang_from, lang_to } = result as Translation;
     await this.cacheRepository.delete({
       service,
       video_id,

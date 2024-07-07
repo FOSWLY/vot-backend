@@ -1,7 +1,7 @@
 import { TranslatedService } from "./types/translation";
 
 export class UnAuthorizedError extends Error {
-  constructor(unknownToken: boolean = false) {
+  constructor(unknownToken = false) {
     super(unknownToken ? "Unknown token type" : "Not authenticated");
   }
 }

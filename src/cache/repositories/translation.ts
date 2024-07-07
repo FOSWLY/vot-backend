@@ -1,9 +1,4 @@
-import {
-  GetTranslationOpts,
-  NewTranslation,
-  Translation,
-  TranslationUpdate,
-} from "../../schemas/translation";
+import { GetTranslationOpts, Translation, TranslationUpdate } from "../../schemas/translation";
 import {
   TranslatedService,
   translatedServices,
@@ -26,13 +21,19 @@ export default class TranslationRepository extends BaseRepository {
     return `${this.prefix}:translation:${service}`;
   }
 
-  async get({ service, video_id, provider, lang_from, lang_to }: GetTranslationOpts) {
+  async get({
+    service,
+    video_id,
+    provider,
+    lang_from,
+    lang_to,
+  }: GetTranslationOpts): Promise<undefined | Translation> {
     const result = await cache.hget(
       this.getKey(service),
       this.getField(video_id, provider, lang_from, lang_to),
     );
 
-    return result ? JSON.parse(result) : undefined;
+    return result ? (JSON.parse(result) as Translation) : undefined;
   }
 
   async getAll(criteria: Partial<Translation> = {}) {
@@ -44,14 +45,15 @@ export default class TranslationRepository extends BaseRepository {
     const result = [];
     for await (const service of services) {
       const cached = await cache.hgetall(this.getKey(service));
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for (const [_, val] of Object.entries(cached)) {
-        const data: Translation = JSON.parse(val);
+        const data = JSON.parse(val) as Translation;
         if (
-          (criteria.id && data.id !== criteria.id) ||
-          (criteria.video_id && data.video_id !== criteria.video_id) ||
-          (criteria.status && data.status !== criteria.status) ||
-          (criteria.provider && data.provider !== criteria.provider) ||
-          (criteria.translated_url && data.translated_url !== criteria.translated_url) ||
+          (criteria.id && data.id !== criteria.id) ??
+          (criteria.video_id && data.video_id !== criteria.video_id) ??
+          (criteria.status && data.status !== criteria.status) ??
+          (criteria.provider && data.provider !== criteria.provider) ??
+          (criteria.translated_url && data.translated_url !== criteria.translated_url) ??
           (criteria.created_at && data.created_at !== criteria.created_at)
         ) {
           continue;
@@ -74,8 +76,6 @@ export default class TranslationRepository extends BaseRepository {
       ...res,
       ...updateWith,
     });
-
-    return;
   }
 
   async create(translation: Translation) {

@@ -63,6 +63,7 @@ const app = new Elysia({ prefix: "/v1" })
           detail: "Route not found :(",
         };
       case "VALIDATION":
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return error.all;
       case "MISSING_RAW_VIDEO_FIELD":
         set.status = httpStatus.HTTP_422_UNPROCESSABLE_ENTITY;

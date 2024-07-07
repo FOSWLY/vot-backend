@@ -2,7 +2,6 @@ import { Elysia } from "elysia";
 
 import { videoTranslationModels } from "../../models/translation.model";
 import { translationQueue } from "../../worker";
-import { Translation } from "../../schemas/translation";
 import TranslationFacade from "../../facades/translation";
 import config from "../../config";
 import { generatePreSigned } from "../../s3/save";
@@ -26,7 +25,7 @@ export default new Elysia().group("/video-translation", (app) =>
           ? new Date(translation.created_at).getTime() + config.db.outdateAfter < Date.now()
           : false;
       if (translationStatus === "success" || (translationStatus === "failed" && !isOutdated)) {
-        const { id, provider, translated_url, created_at, message } = translation as Translation;
+        const { id, provider, translated_url, created_at, message } = translation!;
         const translatedUrl = translated_url
           ? await generatePreSigned(translated_url)
           : translated_url;

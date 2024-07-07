@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable @typescript-eslint/unbound-method */
 import { Queue, QueueBaseOptions, Worker } from "bullmq";
 
 import config from "./config";

@@ -1,4 +1,3 @@
-import { TranslatedService, TranslationProvider } from "../../types/translation";
 import { db } from "../database";
 import {
   TranslationUpdate,
@@ -14,7 +13,7 @@ export default class TranslationRepository extends BaseRepository {
   }
 
   async get({ service, video_id, provider, lang_from, lang_to }: GetTranslationOpts) {
-    let query = db
+    const query = db
       .selectFrom(this.dbName)
       .where("service", "=", service)
       .where("video_id", "=", video_id)

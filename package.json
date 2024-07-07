@@ -8,36 +8,38 @@
     "migrate:up": "bun run migrate",
     "migrate:down": "MIGRATOR_ACTION=downgrade bun run src/database/migrator.ts",
     "s3:disable-cors": "bun scripts/disable-cors.ts",
+    "lint": "npx oxlint && npx eslint",
     "prepare": "husky"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.598.0",
+    "@aws-sdk/client-s3": "^3.609.0",
     "@aws-sdk/s3-request-presigner": "^3.609.0",
-    "@elysiajs/swagger": "^1.0.4",
-    "bullmq": "^5.8.1",
-    "elysia": "^1.0.15",
+    "@elysiajs/swagger": "^1.0.5",
+    "bullmq": "^5.8.4",
+    "elysia": "^1.0.27",
     "elysia-http-status-code": "^1.0.9",
     "ioredis": "^5.4.1",
-    "kysely": "^0.27.3",
+    "kysely": "^0.27.4",
     "pg": "^8.12.0",
     "pino": "^9.2.0",
     "pino-loki": "^2.3.0",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "vot.js": "link:vot.js"
   },
   "devDependencies": {
+    "@types/eslint__js": "^8.42.3",
     "@types/pg": "^8.11.6",
-    "@types/uuid": "^9.0.8",
-    "@typescript-eslint/eslint-plugin": "^7.8.0",
-    "@typescript-eslint/parser": "^7.8.0",
+    "@types/uuid": "^10.0.0",
     "bun-types": "latest",
-    "eslint": "^8.57.0",
-    "eslint-plugin-oxlint": "^0.2.4",
-    "eslint-plugin-sonarjs": "^0.25.1",
+    "eslint": "^9.6.0",
+    "eslint-plugin-oxlint": "^0.5.0",
+    "eslint-plugin-sonarjs": "^1.0.3",
     "husky": "^9.0.11",
-    "oxlint": "^0.2.14",
-    "pino-pretty": "^11.2.1"
+    "oxlint": "^0.5.3",
+    "pino-pretty": "^11.2.1",
+    "typescript-eslint": "^7.15.0"
   },
-  "module": "src/index.js",
+  "module": "src/index.ts",
   "bun-create": {
     "start": "bun run src/index.ts"
   },

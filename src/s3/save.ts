@@ -25,16 +25,17 @@ export async function saveAudio(filename: string, body: Uint8Array) {
       success: results.$metadata.httpStatusCode === 200,
       etag: results.ETag,
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = (err as Error).message;
     log.error(
       {
-        err: err.message,
+        err: message,
       },
       `Failed to save audio file (${filename}) to s3 bucket ${config.s3.bucket}`,
     );
     return {
       success: false,
-      message: err.message,
+      message,
     };
   }
 }
@@ -43,7 +44,6 @@ export async function generatePreSigned(filename: string) {
   try {
     const command = new GetObjectCommand({ Bucket: bucket, Key: filename });
 
-    // @ts-ignore
     return await getSignedUrl(s3client, command, {
       expiresIn: URL_LIFETIME,
       unhoistableHeaders: new Set("x-id"),

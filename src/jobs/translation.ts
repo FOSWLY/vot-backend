@@ -53,6 +53,7 @@ export default abstract class TranslationJob {
     await job.updateProgress(TranslationProgress.WAIT_TRANSLATION);
 
     return new Promise((resolve) => {
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       timer = setTimeout(async () => {
         const res = await TranslationJob.translateVideoImpl(
           client,
@@ -78,7 +79,7 @@ export default abstract class TranslationJob {
       });
 
       const blob = await res.arrayBuffer();
-      const uint8arr = new Uint8Array(blob as ArrayBuffer);
+      const uint8arr = new Uint8Array(blob);
 
       const path = `${TranslationJob.s3prefix}/${service}/${uuidv7()}.mp3`;
       const s3result = await saveAudio(path, uint8arr);
@@ -87,8 +88,8 @@ export default abstract class TranslationJob {
       }
 
       return path;
-    } catch (err: any) {
-      log.error(`Failed to upload audio from ${url}`, err.message);
+    } catch (err: unknown) {
+      log.error(`Failed to upload audio from ${url}`, (err as Error).message);
       return null;
     }
   }
@@ -152,11 +153,11 @@ export default abstract class TranslationJob {
   }
 
   static async onProgress(job: Job<TranslationJobOpts>, progress: number | object) {
-    log.info(job.data, `Job ${job.id} progressed to ${progress}`);
+    log.info(job.data, `Job ${job.id} progressed to ${progress as number}`);
 
     const { service, videoId, fromLang, toLang, provider, remainingTime } = job.data;
 
-    let message =
+    const message =
       TranslationJob.messageByProgress[progress as TranslationProgress] ?? "Выполняем перевод";
 
     await new TranslationFacade().update(
@@ -194,7 +195,7 @@ export default abstract class TranslationJob {
     );
   }
 
-  static async onCompleted(job: Job, returnValue: any) {
+  static onCompleted(job: Job) {
     log.info(`Job ${job.id} has completed!`);
   }
 }

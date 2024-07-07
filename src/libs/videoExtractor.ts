@@ -8,7 +8,7 @@ const serviceCDNs: Partial<Record<TranslatedService, string>> = {
   kodik: "cloud.kodik-storage.com",
 };
 
-export default async function extractVideo(service: TranslatedService, rawVideo: string = "") {
+export default async function extractVideo(service: TranslatedService, rawVideo = "") {
   if (!rawVideo) {
     throw new MissingRawVideoField(service);
   }
@@ -18,10 +18,7 @@ export default async function extractVideo(service: TranslatedService, rawVideo:
     case "kodik":
     case "reddit": {
       const url = new URL(rawVideo);
-      if (
-        !url.hostname.endsWith(serviceCDNs[service] as string) ||
-        !url.pathname.includes(".m3u8")
-      ) {
+      if (!url.hostname.endsWith(serviceCDNs[service]!) || !url.pathname.includes(".m3u8")) {
         throw new UnSupportedVideoLink();
       }
 

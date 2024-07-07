@@ -12,24 +12,11 @@ export async function disableCors() {
       CORSConfiguration: {
         CORSRules: [
           {
-            // CORSRule
             ID: "DISABLE_CORS",
-            AllowedHeaders: [
-              // AllowedHeaders
-              "*",
-            ],
-            AllowedMethods: [
-              // AllowedMethods // required
-              "GET",
-            ],
-            AllowedOrigins: [
-              // AllowedOrigins // required
-              "*",
-            ],
-            ExposeHeaders: [
-              // ExposeHeaders
-              "*",
-            ],
+            AllowedHeaders: ["*"],
+            AllowedMethods: ["GET"],
+            AllowedOrigins: ["*"],
+            ExposeHeaders: ["*"],
           },
         ],
       },

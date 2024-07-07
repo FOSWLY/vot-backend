@@ -25,7 +25,9 @@ async function migrate() {
   results?.forEach((it) => {
     if (it.status === "Success") {
       log.info(
-        `Migration "${it.migrationName}" was ${action === "upgrade" ? "executed" : "downgraded"} successfully`,
+        `Migration "${it.migrationName}" was ${
+          action === "upgrade" ? "executed" : "downgraded"
+        } successfully`,
       );
     } else if (it.status === "Error") {
       log.error(`Failed to execute migration "${it.migrationName}"`);
@@ -41,4 +43,4 @@ async function migrate() {
   await db.destroy();
 }
 
-migrate();
+await migrate();

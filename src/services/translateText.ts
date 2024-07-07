@@ -1,4 +1,5 @@
 import config from "../config";
+import { fetchWithTimeout } from "../libs/network";
 import { TranslateTextResponse, TranslateLang } from "../types/services";
 
 export default class TranslateTextService {
@@ -6,19 +7,17 @@ export default class TranslateTextService {
 
   static async translate(text: string, lang: TranslateLang): Promise<TranslateTextResponse | null> {
     try {
-      const res = await fetch(
-        `${this.hostname}/translate?${new URLSearchParams({
-          text,
-          lang,
-        })}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
+      const urlParams = new URLSearchParams({
+        text,
+        lang,
+      }).toString();
+      const res = await fetchWithTimeout(`${this.hostname}/translate?${urlParams}`, {
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+      });
 
-      return await res.json();
+      return (await res.json()) as TranslateTextResponse;
     } catch (err) {
       console.error(`Failed to translate text "${text}"`, err);
       return null;
