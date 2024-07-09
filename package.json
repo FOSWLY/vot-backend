@@ -24,7 +24,7 @@
     "pino": "^9.2.0",
     "pino-loki": "^2.3.0",
     "uuid": "^10.0.0",
-    "vot.js": "link:vot.js"
+    "vot.js": "^0.4.0"
   },
   "devDependencies": {
     "@types/eslint__js": "^8.42.3",

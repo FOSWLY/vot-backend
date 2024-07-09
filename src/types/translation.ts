@@ -1,31 +1,17 @@
 import { Translation } from "../schemas/translation";
+import { YandexType } from "vot.js";
 
 export const translatedServices = ["mux", "reddit", "kodik"] as const;
 export type TranslatedService = (typeof translatedServices)[number];
 export type TranslationStatus = "success" | "waiting" | "parted" | "failed";
 export type TranslationProvider = "yandex";
-export type TranslationFromLang =
-  | "auto"
-  | "ru"
-  | "en"
-  | "zh"
-  | "ko"
-  | "lt"
-  | "lv"
-  | "ar"
-  | "fr"
-  | "it"
-  | "es"
-  | "de"
-  | "ja";
-export type TranslationToLang = "ru" | "en" | "kk";
 
 export type TranslationJobOpts = {
   oldTranslation: null | Translation;
   service: TranslatedService;
   videoId: string;
-  fromLang: TranslationFromLang;
-  toLang: TranslationToLang;
+  fromLang: YandexType.RequestLang;
+  toLang: YandexType.ResponseLang;
   rawVideo?: string;
   provider: TranslationProvider;
   remainingTime?: number;

@@ -17,6 +17,8 @@ import {
 } from "../types/services";
 import { TranslationJobOpts, TranslationProgress } from "../types/translation";
 import { fetchWithTimeout } from "../libs/network";
+import { getVideoData } from "vot.js/dist/utils/videoData";
+import { VideoData } from "vot.js/dist/types/client";
 
 export default abstract class TranslationJob {
   static s3prefix = "vtrans";
@@ -30,13 +32,13 @@ export default abstract class TranslationJob {
   static async translateVideoImpl(
     client: VOTClient,
     job: Job<TranslationJobOpts>,
-    url: string,
+    videoData: VideoData,
     timer: ReturnType<typeof setTimeout> | undefined = undefined,
     translationHelp: YandexType.TranslationHelp[] | null = null,
   ): Promise<YandexType.VideoTranslationResponse> {
     clearTimeout(timer);
     const res = await client.translateVideo({
-      url,
+      videoData,
       translationHelp,
     });
 
@@ -58,7 +60,7 @@ export default abstract class TranslationJob {
         const res = await TranslationJob.translateVideoImpl(
           client,
           job,
-          url,
+          videoData,
           timer,
           translationHelp,
         );
@@ -125,11 +127,8 @@ export default abstract class TranslationJob {
     });
 
     // в случае ошибки сразу падает в onError, поэтому обрабатывать не надо
-    const translateRes = await TranslationJob.translateVideoImpl(
-      client,
-      job,
-      (mediaRes as MediaConverterSuccessResponse).url,
-    );
+    const videoData = await getVideoData((mediaRes as MediaConverterSuccessResponse).url);
+    const translateRes = await TranslationJob.translateVideoImpl(client, job, videoData);
     await job.updateProgress(TranslationProgress.DOWNLOAD_TRANSLATION);
 
     const path = await TranslationJob.uploadTranslatedAudio(
