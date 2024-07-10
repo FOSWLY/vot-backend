@@ -3,7 +3,10 @@
     {
       "name": "vot-backend",
       "script": "bun",
-      "args": "run start"
+      "args": "run start",
+      "instances": 1,
+      "listen_timeout": 300000,
+      "cron_restart": 0
     }
   ]
 }
