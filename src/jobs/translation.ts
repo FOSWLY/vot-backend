@@ -1,4 +1,4 @@
-import VOTClient, { YandexType } from "vot.js";
+import VOTClient, { YandexType, ClientType } from "vot.js";
 import { v4 as uuidv7 } from "uuid";
 import { Job } from "bullmq";
 
@@ -17,8 +17,7 @@ import {
 } from "../types/services";
 import { TranslationJobOpts, TranslationProgress } from "../types/translation";
 import { fetchWithTimeout } from "../libs/network";
-import { getVideoData } from "vot.js/dist/utils/videoData";
-import { VideoData } from "vot.js/dist/types/client";
+import { getVideoData } from "vot.js/utils/videoData";
 
 export default abstract class TranslationJob {
   static s3prefix = "vtrans";
@@ -32,7 +31,7 @@ export default abstract class TranslationJob {
   static async translateVideoImpl(
     client: VOTClient,
     job: Job<TranslationJobOpts>,
-    videoData: VideoData,
+    videoData: ClientType.VideoData,
     timer: ReturnType<typeof setTimeout> | undefined = undefined,
     translationHelp: YandexType.TranslationHelp[] | null = null,
   ): Promise<YandexType.VideoTranslationResponse> {
@@ -127,7 +126,9 @@ export default abstract class TranslationJob {
     });
 
     // в случае ошибки сразу падает в onError, поэтому обрабатывать не надо
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
     const videoData = await getVideoData((mediaRes as MediaConverterSuccessResponse).url);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const translateRes = await TranslationJob.translateVideoImpl(client, job, videoData);
     await job.updateProgress(TranslationProgress.DOWNLOAD_TRANSLATION);
 
