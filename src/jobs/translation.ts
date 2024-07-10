@@ -1,4 +1,5 @@
 import VOTClient, { YandexType, ClientType } from "vot.js";
+import { getVideoData } from "vot.js/utils/videoData";
 import { v4 as uuidv7 } from "uuid";
 import { Job } from "bullmq";
 
@@ -12,12 +13,17 @@ import TranslationFacade from "../facades/translation";
 import { FailedExtractVideo } from "../errors";
 import {
   MediaConverterFailedResponse,
-  MediaConverterSuccessResponse,
+  MediaConverterResponse,
   TranslateTextSuccessResponse,
 } from "../types/services";
 import { TranslationJobOpts, TranslationProgress } from "../types/translation";
 import { fetchWithTimeout } from "../libs/network";
-import { getVideoData } from "vot.js/utils/videoData";
+
+function isFailedMediaRes(
+  mediaRes: MediaConverterResponse | null,
+): mediaRes is MediaConverterFailedResponse | null {
+  return !mediaRes || !!(mediaRes as MediaConverterFailedResponse).error;
+}
 
 export default abstract class TranslationJob {
   static s3prefix = "vtrans";
@@ -53,18 +59,23 @@ export default abstract class TranslationJob {
 
     await job.updateProgress(TranslationProgress.WAIT_TRANSLATION);
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       timer = setTimeout(async () => {
-        const res = await TranslationJob.translateVideoImpl(
-          client,
-          job,
-          videoData,
-          timer,
-          translationHelp,
-        );
-        if (res.translated && res.remainingTime < 1) {
-          resolve(res);
+        try {
+          const res = await TranslationJob.translateVideoImpl(
+            client,
+            job,
+            videoData,
+            timer,
+            translationHelp,
+          );
+          if (res.translated && res.remainingTime < 1) {
+            resolve(res);
+          }
+        } catch (err) {
+          // bullmq can't prevent timed out errors
+          reject(err);
         }
       }, 30_000);
     });
@@ -115,7 +126,7 @@ export default abstract class TranslationJob {
     await job.updateProgress(TranslationProgress.VIDEO_PROCESSING);
 
     const mediaRes = await extractVideo(service, rawVideo);
-    if (!mediaRes || (mediaRes as MediaConverterFailedResponse).error) {
+    if (isFailedMediaRes(mediaRes)) {
       throw new FailedExtractVideo();
     }
 
@@ -126,8 +137,8 @@ export default abstract class TranslationJob {
     });
 
     // в случае ошибки сразу падает в onError, поэтому обрабатывать не надо
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
-    const videoData = await getVideoData((mediaRes as MediaConverterSuccessResponse).url);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+    const videoData = await getVideoData(mediaRes.url);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const translateRes = await TranslationJob.translateVideoImpl(client, job, videoData);
     await job.updateProgress(TranslationProgress.DOWNLOAD_TRANSLATION);
