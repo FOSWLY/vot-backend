@@ -1,4 +1,5 @@
-import VOTClient, { YandexType, ClientType } from "vot.js";
+import VOTClient from "vot.js";
+import { YandexType, ClientType } from "vot.js/types";
 import { getVideoData } from "vot.js/utils/videoData";
 import { v4 as uuidv7 } from "uuid";
 import { Job } from "bullmq";
@@ -137,9 +138,7 @@ export default abstract class TranslationJob {
     });
 
     // в случае ошибки сразу падает в onError, поэтому обрабатывать не надо
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
     const videoData = await getVideoData(mediaRes.url);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const translateRes = await TranslationJob.translateVideoImpl(client, job, videoData);
     await job.updateProgress(TranslationProgress.DOWNLOAD_TRANSLATION);
 

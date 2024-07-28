@@ -1,7 +1,7 @@
 import { Translation } from "../schemas/translation";
-import { YandexType } from "vot.js";
+import { YandexType } from "vot.js/types";
 
-export const translatedServices = ["mux", "reddit", "kodik"] as const;
+export const translatedServices = ["mux", "reddit", "kodik", "kick"] as const;
 export type TranslatedService = (typeof translatedServices)[number];
 export type TranslationStatus = "success" | "waiting" | "parted" | "failed";
 export type TranslationProvider = "yandex";
