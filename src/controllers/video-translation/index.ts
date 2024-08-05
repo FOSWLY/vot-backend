@@ -19,7 +19,7 @@ export default new Elysia().group("/video-translation", (app) =>
         lang_to: toLang,
       });
 
-      const translationStatus = String(translation?.status);
+      const translationStatus = translation?.status;
       const isOutdated =
         translation?.created_at && translationStatus !== "success"
           ? new Date(translation.created_at).getTime() + config.db.outdateAfter < Date.now()
@@ -41,9 +41,9 @@ export default new Elysia().group("/video-translation", (app) =>
 
       if (!translation || isOutdated) {
         await translationQueue.add(
-          `translation (${provider} ${videoId} ${fromLang} ${toLang})`,
+          `translation (${service} ${provider} ${videoId} ${fromLang} ${toLang})`,
           {
-            oldTranslation: translation,
+            hasOldTranslation: isOutdated,
             service,
             videoId: video_id,
             fromLang,
@@ -57,6 +57,7 @@ export default new Elysia().group("/video-translation", (app) =>
               count: 1000,
             },
             removeOnFail: true,
+            debounce: { id: `${service}-${provider}-${videoId}-${fromLang}-${toLang}`, ttl: 5000 },
           },
         );
       }
