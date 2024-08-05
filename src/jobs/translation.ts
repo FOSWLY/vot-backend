@@ -1,7 +1,7 @@
 import VOTClient from "vot.js";
 import { YandexType, ClientType } from "vot.js/types";
 import { getVideoData } from "vot.js/utils/videoData";
-import { v4 as uuidv7 } from "uuid";
+import { v7 as uuidv7 } from "uuid";
 import { Job } from "bullmq";
 
 import config from "../config";
@@ -13,17 +13,24 @@ import { saveAudio } from "../s3/save";
 import TranslationFacade from "../facades/translation";
 import { FailedExtractVideo } from "../errors";
 import {
-  MediaConverterFailedResponse,
+  MediaConverterErrorResponse,
+  MediaConverterFinalResponse,
   MediaConverterResponse,
+  MediaConverterWaitingResponse,
   TranslateTextSuccessResponse,
 } from "../types/services";
 import { TranslationJobOpts, TranslationProgress } from "../types/translation";
 import { fetchWithTimeout } from "../libs/network";
+import { Log } from "kysely";
 
 function isFailedMediaRes(
   mediaRes: MediaConverterResponse | null,
-): mediaRes is MediaConverterFailedResponse | null {
-  return !mediaRes || !!(mediaRes as MediaConverterFailedResponse).error;
+): mediaRes is null | MediaConverterWaitingResponse | MediaConverterErrorResponse {
+  return (
+    !mediaRes ||
+    !!(mediaRes as MediaConverterErrorResponse)?.error ||
+    (mediaRes as MediaConverterWaitingResponse)?.status !== "success"
+  );
 }
 
 export default abstract class TranslationJob {
@@ -108,7 +115,7 @@ export default abstract class TranslationJob {
   }
 
   static async processor(job: Job<TranslationJobOpts>) {
-    const { oldTranslation, service, videoId, fromLang, toLang, provider, rawVideo } = job.data;
+    const { hasOldTranslation, service, videoId, fromLang, toLang, provider, rawVideo } = job.data;
     const getBy = {
       service,
       video_id: videoId,
@@ -118,7 +125,7 @@ export default abstract class TranslationJob {
     };
 
     const translationFacade = new TranslationFacade();
-    if (oldTranslation) {
+    if (hasOldTranslation) {
       await translationFacade.delete(getBy);
     }
 
@@ -128,7 +135,10 @@ export default abstract class TranslationJob {
 
     const mediaRes = await extractVideo(service, rawVideo);
     if (isFailedMediaRes(mediaRes)) {
-      throw new FailedExtractVideo();
+      throw new FailedExtractVideo(
+        (mediaRes as MediaConverterWaitingResponse)?.message ??
+          (mediaRes as MediaConverterErrorResponse)?.error,
+      );
     }
 
     await job.updateProgress(TranslationProgress.WAIT_TRANSLATION);
@@ -138,7 +148,7 @@ export default abstract class TranslationJob {
     });
 
     // в случае ошибки сразу падает в onError, поэтому обрабатывать не надо
-    const videoData = await getVideoData(mediaRes.url);
+    const videoData = await getVideoData((mediaRes as MediaConverterFinalResponse).download_url);
     const translateRes = await TranslationJob.translateVideoImpl(client, job, videoData);
     await job.updateProgress(TranslationProgress.DOWNLOAD_TRANSLATION);
 
@@ -206,6 +216,6 @@ export default abstract class TranslationJob {
   }
 
   static onCompleted(job: Job) {
-    log.info(`Job ${job.id} has completed!`);
+    log.debug(`Job ${job.id} has completed!`);
   }
 }

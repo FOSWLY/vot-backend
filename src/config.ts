@@ -36,6 +36,8 @@ export default {
     mediaConverter: {
       hostname: Bun.env.MEDIA_CONVERTER_HOSTNAME ?? "http://127.0.0.1:3001",
       token: Bun.env.MEDIA_CONVERTER_TOKEN ?? "",
+      maxReqInterrupt: 120, // if the number of request repeats > the maxRequestInterrupt, then abort as a failure
+      convertReqInterval: 2500, // 24 req/min
     },
     translateText: {
       hostname: Bun.env.TRANSLATE_TEXT_HOSTNAME ?? "http://127.0.0.1:3313",

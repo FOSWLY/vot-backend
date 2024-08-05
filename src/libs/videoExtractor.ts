@@ -7,6 +7,7 @@ const serviceCDNs: Partial<Record<TranslatedService, string>> = {
   reddit: "v.redd.it",
   kodik: "cloud.kodik-storage.com",
   kick: "clips.kick.com",
+  apple_developer: "devstreaming-cdn.apple.com",
 };
 
 export default async function extractVideo(service: TranslatedService, rawVideo = "") {
@@ -18,13 +19,14 @@ export default async function extractVideo(service: TranslatedService, rawVideo 
     case "mux":
     case "kodik":
     case "kick":
-    case "reddit": {
+    case "reddit":
+    case "apple_developer": {
       const url = new URL(rawVideo);
       if (!url.hostname.endsWith(serviceCDNs[service]!) || !url.pathname.includes(".m3u8")) {
         throw new UnSupportedVideoLink();
       }
 
-      return await MediaConverterService.convert(rawVideo, "m3u8-mp4");
+      return await MediaConverterService.fullConvert(rawVideo, "m3u8-mp4");
     }
   }
 }
