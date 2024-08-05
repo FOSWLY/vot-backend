@@ -8,6 +8,8 @@ import { cache } from "../cache";
 import BaseRepository from "./base";
 
 export default class TranslationRepository extends BaseRepository {
+  repositoryName = "translation";
+
   private getField(
     video_id: string,
     provider: TranslationProvider,
@@ -18,7 +20,7 @@ export default class TranslationRepository extends BaseRepository {
   }
 
   private getKey(service: TranslatedService) {
-    return `${this.prefix}:translation:${service}`;
+    return `${this.prefix}:${this.repositoryName}:${service}`;
   }
 
   async get({
