@@ -44,17 +44,17 @@ const app = new Elysia({ prefix: "/v1" })
     }),
   )
   .use(HttpStatusCode())
+  .onRequest(({ set }) => {
+    for (const [key, val] of Object.entries(config.cors)) {
+      set.headers[key] = val;
+    }
+  })
   .error({
     UNAUTHORIZED_ERROR: UnAuthorizedError,
     INTERNAL_SERVER_ERROR: InternalServerError,
     MISSING_RAW_VIDEO_FIELD: MissingRawVideoField,
     UNSUPPORTED_VIDEO_LINK: UnSupportedVideoLink,
     FAILED_EXTRACT_VIDEO: FailedExtractVideo,
-  })
-  .onRequest(({ set }) => {
-    for (const [key, val] of Object.entries(config.cors)) {
-      set.headers[key] = val;
-    }
   })
   .onError(({ set, code, error, httpStatus }) => {
     switch (code) {
@@ -63,7 +63,6 @@ const app = new Elysia({ prefix: "/v1" })
           detail: "Route not found :(",
         };
       case "VALIDATION":
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return error.all;
       case "MISSING_RAW_VIDEO_FIELD":
         set.status = httpStatus.HTTP_422_UNPROCESSABLE_ENTITY;
