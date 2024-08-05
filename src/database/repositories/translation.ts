@@ -55,6 +55,18 @@ export default class TranslationRepository extends BaseRepository {
       );
     }
 
+    if (criteria.message !== undefined) {
+      query = query.where("message", criteria.message === null ? "is" : "=", criteria.message);
+    }
+
+    if (criteria.remaining_time !== undefined) {
+      query = query.where(
+        "remaining_time",
+        criteria.remaining_time === null ? "is" : "=",
+        criteria.remaining_time,
+      );
+    }
+
     if (criteria.created_at) {
       query = query.where("created_at", "=", criteria.created_at);
     }
