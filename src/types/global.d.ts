@@ -1,6 +1,7 @@
 declare module "bun" {
   interface Env {
     SERVICE_PORT: number;
+    SERVICE_TOKEN: string;
     MEDIA_CONVERTER_HOSTNAME: string;
     MEDIA_CONVERTER_TOKEN: string;
     POSTGRES_NAME: string;

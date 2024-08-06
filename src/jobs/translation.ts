@@ -91,17 +91,20 @@ export default abstract class TranslationJob {
 
   static async uploadTranslatedAudio(url: string, service: string) {
     try {
+      log.debug({ url, service }, "fetching translated audio");
+
       const res = await fetchWithTimeout(url, {
         headers: {
           "User-Agent": config.downloaders.userAgent,
         },
-        timeout: 30_000,
+        timeout: 60_000,
       });
 
       const blob = await res.arrayBuffer();
       const uint8arr = new Uint8Array(blob);
 
       const path = `${TranslationJob.s3prefix}/${service}/${uuidv7()}.mp3`;
+      log.debug({ url, service }, "saving translated audio to s3");
       const s3result = await saveAudio(path, uint8arr);
       if (!s3result.success) {
         throw new Error(`Failed to upload audio to s3 bucket. Possible error: ${s3result.message}`);

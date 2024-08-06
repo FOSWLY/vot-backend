@@ -21,4 +21,7 @@ export const videoTranslationModels = new Elysia().model({
     ),
     provider: t.Literal("yandex"),
   }),
+  "video-translation.delete-translate": t.Object({
+    id: t.Number(),
+  }),
 });
