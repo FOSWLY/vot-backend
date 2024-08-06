@@ -10,6 +10,6 @@ export default new S3Client({
     secretAccessKey: config.s3.secretAccessKey,
   },
   requestHandler: new FetchHttpHandler({
-    requestTimeout: 300_000, // in ms
+    requestTimeout: 180_000, // in ms
   }),
 });
