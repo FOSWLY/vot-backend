@@ -14,9 +14,9 @@ export async function disableCors() {
           {
             ID: "DISABLE_CORS",
             AllowedHeaders: ["*"],
-            AllowedMethods: ["GET"],
+            AllowedMethods: ["GET", "HEAD"],
             AllowedOrigins: ["*"],
-            ExposeHeaders: ["*"],
+            MaxAgeSeconds: 86400,
           },
         ],
       },
