@@ -6,15 +6,15 @@ import { version } from "../package.json";
 export default {
   server: {
     port: Bun.env.SERVICE_PORT ?? 3001,
-    hostname: "0.0.0.0",
+    hostname: Bun.env.SERVICE_HOST ?? "0.0.0.0",
   },
   app: {
-    name: "[FOSWLY] VOT Backend",
-    desc: "",
+    name: Bun.env.APP_NAME ?? "[FOSWLY] VOT Backend",
+    desc: Bun.env.APP_DESC ?? "",
     version,
     license: "MIT",
     github_url: "https://github.com/FOSWLY/vot-backend",
-    contact_email: "me@toil.cc",
+    contact_email: Bun.env.APP_CONTACT_EMAIL ?? "me@toil.cc",
     scalarCDN: "https://unpkg.com/@scalar/api-reference@1.15.1/dist/browser/standalone.js",
   },
   cors: {
@@ -37,7 +37,7 @@ export default {
       hostname: Bun.env.MEDIA_CONVERTER_HOSTNAME ?? "http://127.0.0.1:3001",
       token: Bun.env.MEDIA_CONVERTER_TOKEN ?? "",
       maxReqInterrupt: 120, // if the number of request repeats > the maxRequestInterrupt, then abort as a failure
-      convertReqInterval: 2500, // 24 req/min
+      convertReqInterval: 2500, // 24 req/min for single convert
     },
     translateText: {
       hostname: Bun.env.TRANSLATE_TEXT_HOSTNAME ?? "http://127.0.0.1:3313",
