@@ -9,6 +9,7 @@
     "migrate:down": "MIGRATOR_ACTION=downgrade bun run src/database/migrator.ts",
     "s3:disable-cors": "bun scripts/disable-cors.ts",
     "lint": "bunx oxlint --ignore-path=.oxlintignore && bunx eslint",
+    "start:docker": "bun run migrate && bun run start",
     "prepare": "husky"
   },
   "dependencies": {
@@ -25,7 +26,7 @@
     "pino": "^9.3.2",
     "pino-loki": "^2.3.0",
     "uuid": "^10.0.0",
-    "vot.js": "^0.7.1"
+    "vot.js": "1.0.3"
   },
   "devDependencies": {
     "@types/eslint__js": "^8.42.3",
@@ -33,7 +34,7 @@
     "@types/uuid": "^10.0.0",
     "bun-types": "latest",
     "eslint": "^9.8.0",
-    "eslint-plugin-oxlint": "^0.5.0",
+    "eslint-plugin-oxlint": "0.7.1",
     "eslint-plugin-sonarjs": "^1.0.4",
     "husky": "^9.1.4",
     "oxlint": "0.7.0",

@@ -21,7 +21,6 @@ import {
 } from "../types/services";
 import { TranslationJobOpts, TranslationProgress } from "../types/translation";
 import { fetchWithTimeout } from "../libs/network";
-import { Log } from "kysely";
 
 function isFailedMediaRes(
   mediaRes: MediaConverterResponse | null,
@@ -83,7 +82,7 @@ export default abstract class TranslationJob {
           }
         } catch (err) {
           // bullmq can't prevent timed out errors
-          reject(err);
+          reject(err as Error);
         }
       }, 30_000);
     });

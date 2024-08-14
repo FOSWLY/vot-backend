@@ -1,0 +1,65 @@
+version: "3"
+
+services:
+  redis:
+    restart: always
+    image: redis:7-alpine
+    networks:
+      - vot-net
+    volumes:
+      - ./redis:/data
+    healthcheck:
+      test: "redis-cli ping"
+      interval: 5s
+      retries: 20
+
+  db:
+    restart: always
+    image: postgres:16-alpine
+    networks:
+      - vot-net
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: vot-backend
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+    healthcheck:
+      test: "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"
+      interval: 5s
+      retries: 20
+
+  vot-backend:
+    build: .
+    container_name: vot-backend
+    restart: always
+    ports:
+      - "3001:3001"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - vot-net
+    volumes:
+      - ./logs:/usr/src/app/logs
+    environment:
+      SERVICE_TOKEN: 90jrtire8i9u4353asdasdasd
+      MEDIA_CONVERTER_HOSTNAME: http://localhost:3000
+      MEDIA_CONVERTER_TOKEN: x
+      TRANSLATE_TEXT_HOSTNAME: https://translate.toil.cc
+      S3_REGION: ru-central1
+      S3_ENDPOINT: https://storage.yandexcloud.net
+      S3_BUCKET: example
+      S3_ACCESS_KEY_ID:
+      S3_SECRET_ACCESS_KEY:
+      REDIS_HOST: redis
+      POSTGRES_NAME: vot-backend
+      POSTGRES_HOST: db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+
+networks:
+  vot-net:
+    driver: bridge
