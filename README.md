@@ -109,7 +109,7 @@ S3_SECRET_ACCESS_KEY
 docker compose build
 ```
 
-7.1. Если у вас не получается собрать из-за ошибки, связанной .env файлом, добавьте аргумент `--env-file nul` (для Windows) или `--env-file /dev/null` (для Linux)
+7.1. Если у вас не получается собрать из-за ошибки, связанной с .env файлом, добавьте аргумент `--env-file nul` (для Windows) или `--env-file /dev/null` (для Linux)
 
 ```bash
 docker compose --env-file /dev/null build
