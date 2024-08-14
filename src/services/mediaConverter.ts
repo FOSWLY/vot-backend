@@ -39,20 +39,26 @@ export default class MediaConverterService {
     }
   }
 
+  static isFinishedConvert(
+    response: MediaConverterResponse | null,
+  ): response is MediaConverterFinalResponse | MediaConverterErrorResponse {
+    return !!(
+      !response ||
+      (response as MediaConverterErrorResponse)?.error ||
+      (response as MediaConverterFinalResponse)?.status !== "waiting"
+    );
+  }
+
   // make requests until the final result is received
   static async fullConvert(
     url: string,
     direction: ConvertDirection,
     timer: ReturnType<typeof setTimeout> | undefined = undefined,
-    reqNum: number = 0,
+    reqNum = 0,
   ): Promise<MediaConverterResponse | null> {
     clearTimeout(timer);
     const response = await MediaConverterService.convert(url, direction);
-    if (
-      !response ||
-      (response as MediaConverterErrorResponse)?.error ||
-      (response as MediaConverterFinalResponse)?.status !== "waiting"
-    ) {
+    if (MediaConverterService.isFinishedConvert(response)) {
       return response;
     }
 
@@ -62,15 +68,12 @@ export default class MediaConverterService {
     }
 
     return new Promise((resolve) => {
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       timer = setTimeout(async () => {
         reqNum++;
         const response = await MediaConverterService.fullConvert(url, direction, timer, reqNum);
-        if (
-          !response ||
-          (response as MediaConverterErrorResponse).error ||
-          (response as MediaConverterFinalResponse)?.status !== "waiting"
-        ) {
-          return resolve(response);
+        if (MediaConverterService.isFinishedConvert(response)) {
+          resolve(response);
         }
       }, MediaConverterService.convertReqInterval);
     });

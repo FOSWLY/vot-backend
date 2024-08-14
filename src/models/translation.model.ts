@@ -3,12 +3,13 @@ import Elysia, { t } from "elysia";
 import { availableLangs, availableTTS } from "vot.js/consts";
 import { translatedServices } from "../types/translation";
 
-const FromLang = t.TemplateLiteral(`\${${availableLangs.join("|")}}`);
-const ToLang = t.TemplateLiteral(`\${${availableTTS.join("|")}}`);
+const FromLang = t.Union(availableLangs.map((lang) => t.Literal(lang)));
+const ToLang = t.Union(availableTTS.map((lang) => t.Literal(lang)));
+const TranslatedService = t.Union(translatedServices.map((service) => t.Literal(service)));
 
 export const videoTranslationModels = new Elysia().model({
   "video-translation.translate": t.Object({
-    service: t.TemplateLiteral(`\${${translatedServices.join("|")}}`),
+    service: TranslatedService,
     videoId: t.Union([t.String(), t.Number()]),
     fromLang: FromLang,
     toLang: ToLang,
