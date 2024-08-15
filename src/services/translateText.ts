@@ -1,6 +1,6 @@
 import config from "../config";
 import { fetchWithTimeout } from "../libs/network";
-import { TranslateTextResponse, TranslateLang } from "../types/services";
+import { TranslateTextResponse, TranslateLang } from "../types/services/translateText";
 
 export default class TranslateTextService {
   static hostname: string = config.services.translateText.hostname;

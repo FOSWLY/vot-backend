@@ -3,10 +3,10 @@ import { fetchWithTimeout } from "../libs/network";
 import { log } from "../logging";
 import {
   ConvertDirection,
-  MediaConverterErrorResponse,
-  MediaConverterFinalResponse,
-  MediaConverterResponse,
-} from "../types/services";
+  ConverterErrorResponse,
+  ConverterFinalResponse,
+  ConverterResponse,
+} from "../types/services/converter";
 
 export default class MediaConverterService {
   static hostname: string = config.services.mediaConverter.hostname;
@@ -17,7 +17,7 @@ export default class MediaConverterService {
   static async convert(
     url: string,
     direction: ConvertDirection,
-  ): Promise<MediaConverterResponse | null> {
+  ): Promise<ConverterResponse | null> {
     try {
       const res = await fetchWithTimeout(`${this.hostname}/v1/convert`, {
         method: "POST",
@@ -32,7 +32,7 @@ export default class MediaConverterService {
         },
       });
 
-      return (await res.json()) as MediaConverterResponse;
+      return (await res.json()) as ConverterResponse;
     } catch (err) {
       log.error(`Failed to convert ${url}`, err);
       return null;
@@ -40,12 +40,12 @@ export default class MediaConverterService {
   }
 
   static isFinishedConvert(
-    response: MediaConverterResponse | null,
-  ): response is MediaConverterFinalResponse | MediaConverterErrorResponse {
+    response: ConverterResponse | null,
+  ): response is ConverterFinalResponse | ConverterErrorResponse {
     return !!(
       !response ||
-      (response as MediaConverterErrorResponse)?.error ||
-      (response as MediaConverterFinalResponse)?.status !== "waiting"
+      (response as ConverterErrorResponse)?.error ||
+      (response as ConverterFinalResponse)?.status !== "waiting"
     );
   }
 
@@ -55,7 +55,7 @@ export default class MediaConverterService {
     direction: ConvertDirection,
     timer: ReturnType<typeof setTimeout> | undefined = undefined,
     reqNum = 0,
-  ): Promise<MediaConverterResponse | null> {
+  ): Promise<ConverterResponse | null> {
     clearTimeout(timer);
     const response = await MediaConverterService.convert(url, direction);
     if (MediaConverterService.isFinishedConvert(response)) {

@@ -6,6 +6,7 @@ export const translatedServices = [
   "kodik",
   "kick",
   "apple_developer",
+  "epicgames",
   "nineanimetv",
 ] as const;
 export type TranslatedService = (typeof translatedServices)[number];

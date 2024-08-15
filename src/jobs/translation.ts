@@ -13,22 +13,22 @@ import { saveAudio } from "../s3/save";
 import TranslationFacade from "../facades/translation";
 import { FailedExtractVideo } from "../errors";
 import {
-  MediaConverterErrorResponse,
-  MediaConverterFinalResponse,
-  MediaConverterResponse,
-  MediaConverterWaitingResponse,
-  TranslateTextSuccessResponse,
-} from "../types/services";
+  ConverterErrorResponse,
+  ConverterFinalResponse,
+  ConverterResponse,
+  ConverterWaitingResponse,
+} from "../types/services/converter";
+import { TranslateTextSuccessResponse } from "../types/services/translateText";
 import { TranslationJobOpts, TranslationProgress } from "../types/translation";
 import { fetchWithTimeout } from "../libs/network";
 
 function isFailedMediaRes(
-  mediaRes: MediaConverterResponse | null,
-): mediaRes is null | MediaConverterWaitingResponse | MediaConverterErrorResponse {
+  mediaRes: ConverterResponse | null,
+): mediaRes is null | ConverterWaitingResponse | ConverterErrorResponse {
   return (
     !mediaRes ||
-    !!(mediaRes as MediaConverterErrorResponse)?.error ||
-    (mediaRes as MediaConverterWaitingResponse)?.status !== "success"
+    !!(mediaRes as ConverterErrorResponse)?.error ||
+    (mediaRes as ConverterWaitingResponse)?.status !== "success"
   );
 }
 
@@ -138,8 +138,8 @@ export default abstract class TranslationJob {
     const mediaRes = await extractVideo(service, rawVideo);
     if (isFailedMediaRes(mediaRes)) {
       throw new FailedExtractVideo(
-        (mediaRes as MediaConverterWaitingResponse)?.message ??
-          (mediaRes as MediaConverterErrorResponse)?.error,
+        (mediaRes as ConverterWaitingResponse)?.message ??
+          (mediaRes as ConverterErrorResponse)?.error,
       );
     }
 
@@ -150,7 +150,7 @@ export default abstract class TranslationJob {
     });
 
     // в случае ошибки сразу падает в onError, поэтому обрабатывать не надо
-    const videoData = await getVideoData((mediaRes as MediaConverterFinalResponse).download_url);
+    const videoData = await getVideoData((mediaRes as ConverterFinalResponse).download_url);
     const translateRes = await TranslationJob.translateVideoImpl(client, job, videoData);
     await job.updateProgress(TranslationProgress.DOWNLOAD_TRANSLATION);
 
