@@ -1,17 +1,40 @@
 import { TranslatedService } from "../types/translation";
 import { MissingRawVideoField, UnSupportedVideoLink } from "../errors";
 import MediaConverterService from "../services/mediaConverter";
+import { ServiceData } from "../types/services";
 
-const serviceCDNs: Record<TranslatedService, string | RegExp[]> = {
-  mux: "stream.mux.com",
-  reddit: "v.redd.it",
-  kodik: "cloud.kodik-storage.com",
-  kick: "clips.kick.com",
-  apple_developer: "devstreaming-cdn.apple.com",
-  nineanimetv: [
-    /^.*\.betterstream\.cc$/, // wildcard
-    /^.*\.biananset\.net$/, // wildcard
-  ],
+const services: ServiceData = {
+  mux: {
+    match: "stream.mux.com",
+    from: "m3u8",
+  },
+  reddit: {
+    match: "v.redd.it",
+    from: "m3u8",
+  },
+  kodik: {
+    match: "cloud.kodik-storage.com",
+    from: "m3u8",
+  },
+  kick: {
+    match: "clips.kick.com",
+    from: "m3u8",
+  },
+  apple_developer: {
+    match: "devstreaming-cdn.apple.com",
+    from: "m3u8",
+  },
+  epicgames: {
+    match: "cdn.qstv.on.epicgames.com",
+    from: "mpd",
+  },
+  nineanimetv: {
+    match: [
+      /^.*\.betterstream\.cc$/, // wildcard
+      /^.*\.biananset\.net$/, // wildcard
+    ],
+    from: "m3u8",
+  },
 };
 
 export default async function extractVideo(service: TranslatedService, rawVideo = "") {
@@ -19,14 +42,18 @@ export default async function extractVideo(service: TranslatedService, rawVideo 
     throw new MissingRawVideoField(service);
   }
 
-  if (!Object.keys(serviceCDNs).includes(service)) {
+  if (!Object.keys(services).includes(service)) {
     throw new UnSupportedVideoLink();
   }
 
   const url = new URL(rawVideo);
-  const possibleCdn: string | RegExp[] = serviceCDNs[service];
+  const serviceData = services[service];
+  const possibleCdn: string | RegExp[] = serviceData.match;
   const isArrayCdns = Array.isArray(possibleCdn);
-  if ((!isArrayCdns && !url.hostname.endsWith(possibleCdn)) || !url.pathname.includes(".m3u8")) {
+  if (
+    (!isArrayCdns && !url.hostname.endsWith(possibleCdn)) ||
+    (!serviceData.skipExt && !url.pathname.includes(`.${serviceData.from}`))
+  ) {
     throw new UnSupportedVideoLink();
   }
 
@@ -34,5 +61,5 @@ export default async function extractVideo(service: TranslatedService, rawVideo 
     throw new UnSupportedVideoLink();
   }
 
-  return await MediaConverterService.fullConvert(rawVideo, "m3u8-mp4");
+  return await MediaConverterService.fullConvert(rawVideo, `${serviceData.from}-mp4`);
 }
