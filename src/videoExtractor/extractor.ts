@@ -1,7 +1,8 @@
 import { TranslatedService } from "../types/translation";
 import { MissingRawVideoField, UnSupportedVideoLink } from "../errors";
 import MediaConverterService from "../services/mediaConverter";
-import { ServiceData } from "../types/services";
+import { ServiceData } from "../types/videoExtrator/extractor";
+import { getPlaylist } from "./helper/epicgames";
 
 const services: ServiceData = {
   mux: {
@@ -27,6 +28,8 @@ const services: ServiceData = {
   epicgames: {
     match: "cdn.qstv.on.epicgames.com",
     from: "mpd",
+    helper: getPlaylist,
+    skipExt: true,
   },
   nineanimetv: {
     match: [
@@ -59,6 +62,13 @@ export default async function extractVideo(service: TranslatedService, rawVideo 
 
   if (isArrayCdns && !possibleCdn.find((cdn) => cdn.exec(url.hostname))) {
     throw new UnSupportedVideoLink();
+  }
+
+  if (serviceData.helper) {
+    rawVideo = await serviceData.helper(rawVideo);
+    if (!rawVideo) {
+      throw new MissingRawVideoField(service);
+    }
   }
 
   return await MediaConverterService.fullConvert(rawVideo, `${serviceData.from}-mp4`);
