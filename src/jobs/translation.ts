@@ -5,11 +5,11 @@ import { v7 as uuidv7 } from "uuid";
 import { Job } from "bullmq";
 
 import config from "../config";
-import extractVideo from "../libs/videoExtractor";
+import extractVideo from "../videoExtractor/extractor";
 import TranslateTextService from "../services/translateText";
 
 import { log } from "../logging";
-import { saveAudio } from "../s3/save";
+import { deleteAudio, saveAudio } from "../s3/save";
 import TranslationFacade from "../facades/translation";
 import { FailedExtractVideo } from "../errors";
 import {
@@ -128,7 +128,10 @@ export default abstract class TranslationJob {
 
     const translationFacade = new TranslationFacade();
     if (hasOldTranslation) {
-      await translationFacade.delete(getBy);
+      const old = await translationFacade.delete(getBy);
+      if (old?.translated_url) {
+        await deleteAudio(old.translated_url);
+      }
     }
 
     await translationFacade.create({ ...getBy, status: "waiting" });
