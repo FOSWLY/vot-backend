@@ -30,6 +30,7 @@ export default {
       host: Bun.env.LOKI_HOST ?? "",
       user: Bun.env.LOKI_USER ?? "",
       password: Bun.env.LOKI_PASSWORD ?? "",
+      label: Bun.env.LOKI_LABEL ?? "vot-backend",
     },
   },
   services: {

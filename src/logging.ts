@@ -48,7 +48,7 @@ if (loki.host) {
     options: {
       batching: true,
       interval: 5,
-      labels: { application: "vot-backend" },
+      labels: { application: config.logging.loki.label },
       host: loki.host,
       basicAuth:
         loki.user && loki.password
