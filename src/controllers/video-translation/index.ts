@@ -4,8 +4,11 @@ import { videoTranslationModels } from "../../models/translation.model";
 import { translationQueue } from "../../worker";
 import TranslationFacade from "../../facades/translation";
 import config from "../../config";
-import { generatePreSigned } from "../../s3/save";
+import { generatePreSigned, deleteAudio } from "../../s3/actions";
 import { validateAuthToken } from "../../libs/security";
+import { getNavigationData, validateNavigation } from "../../libs/navigation";
+import { isValidId } from "../../libs/utils";
+import { TranslationNotFound } from "../../errors";
 
 export default new Elysia().group("/video-translation", (app) =>
   app
@@ -98,18 +101,77 @@ export default new Elysia().group("/video-translation", (app) =>
         },
       },
       (app) =>
-        app.delete(
-          "/translate/:id",
-          async ({ params: { id } }) => {
-            return await new TranslationFacade().deleteById(id);
-          },
-          {
-            params: "video-translation.delete-translate",
-            detail: {
-              summary: "Delete translated video by id",
-              tags: ["Translate"],
+        app
+          .get(
+            "/list",
+            async ({ query: { page, limit } }) => {
+              let offset;
+              ({ page, limit, offset } = validateNavigation(page, limit));
+
+              const translationFacade = new TranslationFacade();
+              const translations = await translationFacade.getAll({}, offset, limit);
+              const totalTranslations = await translationFacade.getTotal();
+              const navigation = getNavigationData(page, totalTranslations, limit);
+              return {
+                translations,
+                navigation,
+              };
             },
-          },
-        ),
+            {
+              query: "video-translation.list",
+              detail: {
+                summary: "Get list of translates",
+                tags: ["Translate"],
+              },
+            },
+          )
+          .get(
+            "/translate/:id",
+            async ({ params: { id } }) => {
+              if (!isValidId(id)) {
+                throw new TranslationNotFound();
+              }
+
+              const translation = await new TranslationFacade().getById(id);
+              if (!translation) {
+                throw new TranslationNotFound();
+              }
+
+              return translation;
+            },
+            {
+              params: "video-translation.get-translate-by-id",
+              detail: {
+                summary: "Get info about translation by id",
+                tags: ["Translate"],
+              },
+            },
+          )
+          .delete(
+            "/translate/:id",
+            async ({ params: { id } }) => {
+              if (!isValidId(id)) {
+                throw new TranslationNotFound();
+              }
+
+              const translation = await new TranslationFacade().deleteById(id);
+              if (!translation) {
+                throw new TranslationNotFound();
+              }
+
+              if (translation?.translated_url) {
+                await deleteAudio(translation.translated_url);
+              }
+
+              return translation;
+            },
+            {
+              params: "video-translation.delete-translate",
+              detail: {
+                summary: "Delete translated video by id",
+                tags: ["Translate"],
+              },
+            },
+          ),
     ),
 );
