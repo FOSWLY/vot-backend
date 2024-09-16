@@ -18,7 +18,7 @@ const services: ServiceData = {
     from: "m3u8",
   },
   kick: {
-    match: "clips.kick.com",
+    match: [/^stream\.kick\.com$/, /^clips\.kick\.com$/],
     from: "m3u8",
   },
   apple_developer: {
