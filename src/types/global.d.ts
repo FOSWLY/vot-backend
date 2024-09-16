@@ -23,6 +23,8 @@ declare module "bun" {
     LOKI_USER: string;
     LOKI_PASSWORD: string;
     LOKI_LABEL: string;
+    NAVIGATION_DEFAULT_LIMIT: number;
+    NAVIGATION_MAX_LIMIT: number;
     NODE_ENV: string;
   }
 }

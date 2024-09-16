@@ -67,6 +67,11 @@ export default {
     accessKeyID: Bun.env.S3_ACCESS_KEY_ID ?? "",
     secretAccessKey: Bun.env.S3_SECRET_ACCESS_KEY ?? "",
   },
+  navigation: {
+    defaultLimit: Number(Bun.env.NAVIGATION_DEFAULT_LIMIT ?? 10),
+    maxLimit: Number(Bun.env.NAVIGATION_MAX_LIMIT ?? 50),
+    maxPage: 2147483647,
+  },
   downloaders: {
     userAgent:
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 YaBrowser/24.4.0.0 Safari/537.36",
