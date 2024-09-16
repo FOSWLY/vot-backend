@@ -22,6 +22,14 @@ export const videoTranslationModels = new Elysia().model({
     ),
     provider: t.Literal("yandex"),
   }),
+  "video-translation.list": t.Object({
+    // min/max validation for number doesn't work (???)
+    page: t.Optional(t.Number()),
+    limit: t.Optional(t.Number()),
+  }),
+  "video-translation.get-translate-by-id": t.Object({
+    id: t.Number(),
+  }),
   "video-translation.delete-translate": t.Object({
     id: t.Number(),
   }),
