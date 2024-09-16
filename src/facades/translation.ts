@@ -30,13 +30,33 @@ export default class TranslationFacade extends BaseFacade<
     return result;
   }
 
-  async getAll(criteria: Partial<Translation>): Promise<Translation[]> {
-    const cached = await this.cacheRepository.getAll(criteria);
+  async getById(id: number): Promise<Translation | undefined> {
+    const cached = (await this.cacheRepository.getAll({ id }))?.[0];
     if (cached) {
       return cached;
     }
 
-    return (await this.dbRepository.getAll(criteria)) as Translation[];
+    const result = (await this.dbRepository.getById(id)) as Translation | undefined;
+    if (result) {
+      await this.cacheRepository.create(result);
+    }
+
+    return result;
+  }
+
+  async getAll(criteria: Partial<Translation>, offset = 0, limit = 10): Promise<Translation[]> {
+    // !!! not cached
+    // const cached = await this.cacheRepository.getAll(criteria, offset, limit);
+    // if (cached.length) {
+    //   return cached;
+    // }
+
+    return (await this.dbRepository.getAll(criteria, offset, limit)) as Translation[];
+  }
+
+  async getTotal() {
+    // !!! not cached
+    return +((await this.dbRepository.getTotal())?.total ?? 0);
   }
 
   async update(getBy: GetTranslationOpts, updateWith: TranslationUpdate): Promise<boolean> {
