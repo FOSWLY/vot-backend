@@ -9,7 +9,7 @@ import extractVideo from "../videoExtractor/extractor";
 import TranslateTextService from "../services/translateText";
 
 import { log } from "../logging";
-import { deleteAudio, saveAudio } from "../s3/save";
+import { deleteAudio, saveAudio } from "../s3/actions";
 import TranslationFacade from "../facades/translation";
 import { FailedExtractVideo } from "../errors";
 import {
