@@ -6,6 +6,7 @@ import {
   GetTranslationOpts,
 } from "../../schemas/translation";
 import BaseRepository from "./base";
+import config from "../../config";
 
 export default class TranslationRepository extends BaseRepository {
   constructor() {
@@ -24,9 +25,18 @@ export default class TranslationRepository extends BaseRepository {
     return await query.selectAll().executeTakeFirst();
   }
 
-  async getAll(criteria: Partial<Translation> = {}) {
-    let query = db.selectFrom(this.dbName);
+  async getById(id: number) {
+    const query = db.selectFrom(this.dbName).where("id", "=", id);
 
+    return await query.selectAll().executeTakeFirst();
+  }
+
+  async getAll(
+    criteria: Partial<Translation> = {},
+    offset = 0,
+    limit = config.navigation.defaultLimit,
+  ) {
+    let query = db.selectFrom(this.dbName);
     if (criteria.id) {
       query = query.where("id", "=", criteria.id); // Kysely is immutable, you must re-assign!
     }
@@ -71,7 +81,22 @@ export default class TranslationRepository extends BaseRepository {
       query = query.where("created_at", "=", criteria.created_at);
     }
 
-    return await query.selectAll().execute();
+    if (offset > 0) {
+      query = query.offset(offset);
+    }
+
+    if (limit > 0) {
+      query = query.limit(limit);
+    }
+
+    return await query.orderBy("id").selectAll().execute();
+  }
+
+  async getTotal() {
+    return await db
+      .selectFrom(this.dbName)
+      .select((eb) => [eb.fn.count<number>("id").as("total")])
+      .executeTakeFirst();
   }
 
   async update(
