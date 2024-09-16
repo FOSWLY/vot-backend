@@ -29,3 +29,9 @@ export class FailedExtractVideo extends Error {
     super(`The video couldn't be extracted. Let us know about it. Possible error: ${message}`);
   }
 }
+
+export class TranslationNotFound extends Error {
+  constructor() {
+    super(`The requested translation wasn't found!`);
+  }
+}

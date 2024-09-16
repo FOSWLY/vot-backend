@@ -14,6 +14,7 @@ import {
   MissingRawVideoField,
   UnSupportedVideoLink,
   FailedExtractVideo,
+  TranslationNotFound,
 } from "./errors";
 import { HttpStatusCode } from "elysia-http-status-code";
 
@@ -55,6 +56,7 @@ const app = new Elysia({ prefix: "/v1" })
     MISSING_RAW_VIDEO_FIELD: MissingRawVideoField,
     UNSUPPORTED_VIDEO_LINK: UnSupportedVideoLink,
     FAILED_EXTRACT_VIDEO: FailedExtractVideo,
+    TRANSLATION_NOT_FOUND: TranslationNotFound,
   })
   .onError(({ set, code, error, httpStatus }) => {
     switch (code) {
@@ -72,6 +74,9 @@ const app = new Elysia({ prefix: "/v1" })
         break;
       case "UNSUPPORTED_VIDEO_LINK":
         set.status = httpStatus.HTTP_400_BAD_REQUEST;
+        break;
+      case "TRANSLATION_NOT_FOUND":
+        set.status = httpStatus.HTTP_404_NOT_FOUND;
         break;
     }
 
