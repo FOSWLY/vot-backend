@@ -3,5 +3,5 @@ export function getTime() {
 }
 
 export function isValidId(id: number) {
-  return id % 1 === 0;
+  return id % 1 === 0 && id < 2147483647;
 }
