@@ -1,6 +1,6 @@
 {
   "name": "vot-backend",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "scripts": {
     "dev": "NODE_ENV=development bun run --watch src/index.ts",
     "start": "NODE_ENV=production bun src/index.ts",
@@ -13,31 +13,31 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.629.0",
-    "@aws-sdk/s3-request-presigner": "^3.629.0",
+    "@aws-sdk/client-s3": "^3.651.1",
+    "@aws-sdk/s3-request-presigner": "^3.651.1",
     "@elysiajs/swagger": "^1.1.1",
-    "@smithy/fetch-http-handler": "^3.2.4",
-    "bullmq": "^5.12.6",
-    "elysia": "^1.1.6",
+    "@smithy/fetch-http-handler": "^3.2.7",
+    "bullmq": "^5.13.0",
+    "elysia": "^1.1.12",
     "elysia-http-status-code": "^1.0.9",
     "ioredis": "^5.4.1",
     "kysely": "^0.27.4",
     "pg": "^8.12.0",
-    "pino": "^9.3.2",
+    "pino": "^9.4.0",
     "pino-loki": "^2.3.0",
     "uuid": "^10.0.0",
-    "vot.js": "1.0.3"
+    "vot.js": "^1.2.9"
   },
   "devDependencies": {
     "@types/eslint__js": "^8.42.3",
-    "@types/pg": "^8.11.6",
+    "@types/pg": "^8.11.10",
     "@types/uuid": "^10.0.0",
     "bun-types": "latest",
-    "eslint": "^9.9.0",
-    "eslint-plugin-oxlint": "0.7.1",
-    "eslint-plugin-sonarjs": "^1.0.4",
-    "husky": "^9.1.4",
-    "oxlint": "0.7.0",
+    "eslint": "^9.10.0",
+    "eslint-plugin-oxlint": "^0.9.5",
+    "eslint-plugin-sonarjs": "^2.0.2",
+    "husky": "^9.1.6",
+    "oxlint": "^0.9.5",
     "pino-pretty": "^11.2.2",
     "typescript-eslint": "8.0.0"
   },

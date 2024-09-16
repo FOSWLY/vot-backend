@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import TranslationJob from "../src/jobs/translation";
-import { deleteAudio, generatePreSigned } from "../src/s3/save";
+import { deleteAudio, generatePreSigned } from "../src/s3/actions";
 
 test("Audio upload", async () => {
   const res = await TranslationJob.uploadTranslatedAudio("https://s3.toil.cc/test.mp3", "test");
