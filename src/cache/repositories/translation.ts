@@ -1,3 +1,4 @@
+import config from "../../config";
 import { GetTranslationOpts, Translation, TranslationUpdate } from "../../schemas/translation";
 import {
   TranslatedService,
@@ -38,13 +39,17 @@ export default class TranslationRepository extends BaseRepository {
     return result ? (JSON.parse(result) as Translation) : undefined;
   }
 
-  async getAll(criteria: Partial<Translation> = {}) {
+  async getAll(
+    criteria: Partial<Translation> = {},
+    offset = 0,
+    limit = config.navigation.defaultLimit,
+  ) {
     let services: TranslatedService[] = translatedServices as unknown as TranslatedService[];
     if (criteria.service) {
       services = services.filter((service) => service === criteria.service);
     }
 
-    const result = [];
+    let result = [];
     for await (const service of services) {
       const cached = await cache.hgetall(this.getKey(service));
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -63,6 +68,14 @@ export default class TranslationRepository extends BaseRepository {
 
         result.push(data);
       }
+    }
+
+    if (offset > 0) {
+      result = result.slice(offset);
+    }
+
+    if (limit > 0) {
+      result = result.slice(0, offset + limit);
     }
 
     return result;
