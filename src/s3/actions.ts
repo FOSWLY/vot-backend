@@ -31,7 +31,7 @@ export async function saveAudio(filename: string, body: Uint8Array) {
       {
         err: message,
       },
-      `Failed to save audio file (${filename}) to s3 bucket ${config.s3.bucket}`,
+      `Failed to save audio file (${filename}) to s3 bucket ${bucket}`,
     );
     return {
       success: false,
@@ -60,7 +60,7 @@ export async function deleteAudio(filename: string) {
       {
         err: message,
       },
-      `Failed to delete audio file (${filename}) from s3 bucket ${config.s3.bucket}`,
+      `Failed to delete audio file (${filename}) from s3 bucket ${bucket}`,
     );
     return {
       success: false,

@@ -5,6 +5,7 @@ declare module "bun" {
     SERVICE_TOKEN: string;
     MEDIA_CONVERTER_HOSTNAME: string;
     MEDIA_CONVERTER_TOKEN: string;
+    TRANSLATE_TEXT_HOSTNAME: string;
     POSTGRES_NAME: string;
     POSTGRES_HOST: string;
     POSTGRES_PORT: number;
