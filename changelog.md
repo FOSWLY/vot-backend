@@ -1,3 +1,7 @@
+# 1.1.1
+
+- Improved typings
+
 # 1.1.0
 
 - Added support Kick stream

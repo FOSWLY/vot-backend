@@ -52,8 +52,7 @@ export default class TranslationRepository extends BaseRepository {
     let result = [];
     for await (const service of services) {
       const cached = await cache.hgetall(this.getKey(service));
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      for (const [_, val] of Object.entries(cached)) {
+      for (const [, val] of Object.entries(cached)) {
         const data = JSON.parse(val) as Translation;
         if (
           (criteria.id && data.id !== criteria.id) ??

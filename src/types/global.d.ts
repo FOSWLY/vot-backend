@@ -3,6 +3,9 @@ declare module "bun" {
     SERVICE_HOST: string;
     SERVICE_PORT: number;
     SERVICE_TOKEN: string;
+    APP_NAME: string;
+    APP_DESC: string;
+    APP_CONTACT_EMAIL: string;
     MEDIA_CONVERTER_HOSTNAME: string;
     MEDIA_CONVERTER_TOKEN: string;
     TRANSLATE_TEXT_HOSTNAME: string;
