@@ -1,4 +1,4 @@
-import VOTClient from "vot.js";
+import { VOTWorkerClient } from "vot.js";
 import { YandexType, ClientType } from "vot.js/types";
 import { getVideoData } from "vot.js/utils/videoData";
 import { v7 as uuidv7 } from "uuid";
@@ -42,7 +42,7 @@ export default abstract class TranslationJob {
   };
 
   static async translateVideoImpl(
-    client: VOTClient,
+    client: VOTWorkerClient,
     job: Job<TranslationJobOpts>,
     videoData: ClientType.VideoData,
     timer: ReturnType<typeof setTimeout> | undefined = undefined,
@@ -147,7 +147,7 @@ export default abstract class TranslationJob {
     }
 
     await job.updateProgress(TranslationProgress.WAIT_TRANSLATION);
-    const client = new VOTClient({
+    const client = new VOTWorkerClient({
       requestLang: fromLang,
       responseLang: toLang,
     });

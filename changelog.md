@@ -1,3 +1,8 @@
+# 1.1.2
+
+- Removed eslint-plugin-sonarjs
+- Change VOTClient to VOTWorkerClient
+
 # 1.1.1
 
 - Improved typings
