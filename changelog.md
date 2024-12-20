@@ -1,3 +1,7 @@
+# 1.1.3
+
+- Added support Artstation
+
 # 1.1.2
 
 - Removed eslint-plugin-sonarjs
