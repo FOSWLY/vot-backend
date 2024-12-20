@@ -31,6 +31,12 @@ const services: ServiceData = {
     helper: getPlaylist,
     skipExt: true,
   },
+  artstation: {
+    match: "cdn.qstv.on.epicgames.com",
+    from: "mpd",
+    helper: getPlaylist,
+    skipExt: true,
+  },
   nineanimetv: {
     match: [
       /^.*\.betterstream\.cc$/, // wildcard

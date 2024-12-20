@@ -7,7 +7,7 @@ export async function getPlaylist(url: string) {
     const res = await fetchWithTimeout(url);
     const result = (await res.json()) as PlaylistResponse;
     return result.playlist;
-  } catch (err: unknown) {
+  } catch (err) {
     log.error(
       {
         msg: (err as Error)?.message,

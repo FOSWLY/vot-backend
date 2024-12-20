@@ -7,6 +7,7 @@ export const translatedServices = [
   "kick",
   "apple_developer",
   "epicgames",
+  "artstation",
   "nineanimetv",
 ] as const;
 export type TranslatedService = (typeof translatedServices)[number];
