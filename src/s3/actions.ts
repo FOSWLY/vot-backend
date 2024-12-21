@@ -78,7 +78,7 @@ export async function generatePreSigned(filename: string) {
       unhoistableHeaders: new Set("x-id"),
     });
   } catch (err) {
-    console.error(err);
+    log.error(err);
     return null;
   }
 }
