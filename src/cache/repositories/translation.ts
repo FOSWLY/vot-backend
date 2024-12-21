@@ -1,4 +1,5 @@
 import config from "../../config";
+import { log } from "../../logging";
 import { GetTranslationOpts, Translation, TranslationUpdate } from "../../schemas/translation";
 import {
   TranslatedService,
@@ -49,25 +50,35 @@ export default class TranslationRepository extends BaseRepository {
       services = services.filter((service) => service === criteria.service);
     }
 
-    let result = [];
-    for await (const service of services) {
-      const cached = await cache.hgetall(this.getKey(service));
-      for (const [, val] of Object.entries(cached)) {
-        const data = JSON.parse(val) as Translation;
-        if (
-          (criteria.id && data.id !== criteria.id) ??
-          (criteria.video_id && data.video_id !== criteria.video_id) ??
-          (criteria.status && data.status !== criteria.status) ??
-          (criteria.provider && data.provider !== criteria.provider) ??
-          (criteria.translated_url && data.translated_url !== criteria.translated_url) ??
-          (criteria.created_at && data.created_at !== criteria.created_at)
-        ) {
-          continue;
-        }
+    const cachedResults = await Promise.all(
+      services.map((service) => cache.hgetall(this.getKey(service))),
+    );
 
-        result.push(data);
+    let result = cachedResults.reduce((result, cached) => {
+      const translations: Translation[] = Object.values(cached)
+        .map((value) => {
+          const data = JSON.parse(value) as Translation;
+          if (
+            (criteria.id && data.id !== criteria.id) ??
+            (criteria.video_id && data.video_id !== criteria.video_id) ??
+            (criteria.status && data.status !== criteria.status) ??
+            (criteria.provider && data.provider !== criteria.provider) ??
+            (criteria.translated_url && data.translated_url !== criteria.translated_url) ??
+            (criteria.created_at && data.created_at !== criteria.created_at)
+          ) {
+            return false;
+          }
+
+          return data;
+        })
+        .filter((value) => value !== false);
+
+      if (translations) {
+        result.push(...translations);
       }
-    }
+
+      return result;
+    }, [] as Translation[]);
 
     if (offset > 0) {
       result = result.slice(offset);
