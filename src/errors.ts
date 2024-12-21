@@ -26,7 +26,7 @@ export class UnSupportedVideoLink extends Error {
 
 export class FailedExtractVideo extends Error {
   constructor(message: string | null = null) {
-    super(`The video couldn't be extracted. Let us know about it. Possible error: ${message}`);
+    super(`The video couldn't be extracted. Possible error: ${message}`);
   }
 }
 
