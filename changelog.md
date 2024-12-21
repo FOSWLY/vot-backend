@@ -1,3 +1,20 @@
+# 1.2.0
+
+- The database schema has been changed
+
+  `id` serial -> BigInt (identity column)
+  `created_at` timestamp -> timestamptz
+
+- Migrated from `vot.js` to [@vot.js/node](https://github.com/FOSWLY/vot.js)
+- Migrated to /v2 API of [translate-backend](https://github.com/FOSWLY/translate-backend)
+- Added config validation schema
+- Replaced `console.error` to `log.error` in `TranslateTextService` class and in `generatePreSigned` func
+- Refactored logic for `getAll` translations from cache
+- Updated default CORS methods
+- Updated Scalar CDN link
+- Updated depends
+- Improved some typings
+
 # 1.1.3
 
 - Added support Artstation
