@@ -1,4 +1,4 @@
-import { TranslationTable } from "../schemas/translation";
+import { TranslationTable } from "@/schemas/translation";
 
 export interface Database {
   vot_translations: TranslationTable;

@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import { pino, type TransportMultiOptions, type TransportTargetOptions } from "pino";
 
-import config from "./config";
+import config from "@/config";
 
 const { loki } = config.logging;
 const startingDate = new Date().toISOString().split("T")[0];

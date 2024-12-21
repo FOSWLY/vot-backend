@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { Queue, QueueBaseOptions, Worker } from "bullmq";
 
-import config from "./config";
-import TranslationJob from "./jobs/translation";
+import config from "@/config";
+import TranslationJob from "@/jobs/translation";
 
 const { host, port, username, password } = config.redis;
 const concurrency = 200; // https://docs.bullmq.io/guide/workers/concurrency

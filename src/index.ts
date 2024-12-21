@@ -2,12 +2,13 @@ import * as fs from "fs";
 
 import { Elysia } from "elysia";
 import { swagger } from "@elysiajs/swagger";
+import { HttpStatusCode } from "elysia-http-status-code";
 
-import config from "./config";
+import config from "@/config";
 
-import healthController from "./controllers/health";
-import videoTranslation from "./controllers/video-translation";
-import { log } from "./logging";
+import healthController from "@/controllers/health";
+import videoTranslation from "@/controllers/video-translation";
+import { log } from "@/logging";
 import {
   InternalServerError,
   UnAuthorizedError,
@@ -15,8 +16,7 @@ import {
   UnSupportedVideoLink,
   FailedExtractVideo,
   TranslationNotFound,
-} from "./errors";
-import { HttpStatusCode } from "elysia-http-status-code";
+} from "@/errors";
 
 if (!fs.existsSync(config.logging.logPath)) {
   fs.mkdirSync(config.logging.logPath, { recursive: true });

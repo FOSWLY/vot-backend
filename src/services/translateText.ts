@@ -1,9 +1,9 @@
 import type { ClientType, BaseProviderType } from "@toil/translate/types";
 
-import config from "../config";
-import { fetchWithTimeout } from "../libs/network";
-import { FOSWLYErrorResponse } from "../types/services/translateText";
-import { log } from "../logging";
+import config from "@/config";
+import { fetchWithTimeout } from "@/libs/network";
+import { FOSWLYErrorResponse } from "@/types/services/translateText";
+import { log } from "@/logging";
 
 export default class TranslateTextService {
   static hostname: string = config.services.translateText.hostname;

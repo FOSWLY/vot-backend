@@ -1,6 +1,7 @@
 import { S3Client } from "@aws-sdk/client-s3";
-import config from "../config";
 import { FetchHttpHandler } from "@smithy/fetch-http-handler";
+
+import config from "@/config";
 
 export default new S3Client({
   region: config.s3.region,

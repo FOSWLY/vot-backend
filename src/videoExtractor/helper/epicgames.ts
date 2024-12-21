@@ -1,6 +1,6 @@
-import { PlaylistResponse } from "../../types/videoExtrator/helper/epicgames";
-import { fetchWithTimeout } from "../../libs/network";
-import { log } from "../../logging";
+import { PlaylistResponse } from "@/types/videoExtrator/helper/epicgames";
+import { fetchWithTimeout } from "@/libs/network";
+import { log } from "@/logging";
 
 export async function getPlaylist(url: string) {
   try {

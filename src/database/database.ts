@@ -1,9 +1,9 @@
 import { Pool } from "pg";
 import { Kysely, PostgresDialect } from "kysely";
 
-import config from "../config";
+import config from "@/config";
 import { Database } from "./schema";
-import { log } from "../logging";
+import { log } from "@/logging";
 
 const dialect = new PostgresDialect({
   pool: new Pool({

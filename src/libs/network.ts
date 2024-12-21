@@ -1,4 +1,4 @@
-import config from "../config";
+import config from "@/config";
 
 export async function fetchWithTimeout(
   url: string | URL | Request,

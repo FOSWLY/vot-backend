@@ -3,7 +3,7 @@ import { promises as fs } from "fs";
 import { Migrator, FileMigrationProvider } from "kysely";
 
 import { db } from "./database";
-import { log } from "../logging";
+import { log } from "@/logging";
 
 const action = Bun.env.MIGRATOR_ACTION ?? "upgrade";
 

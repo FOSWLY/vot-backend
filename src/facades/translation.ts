@@ -1,12 +1,12 @@
-import TranslationCacheRepository from "../cache/repositories/translation";
-import TranslationDBRepository from "../database/repositories/translation";
+import TranslationCacheRepository from "@/cache/repositories/translation";
+import TranslationDBRepository from "@/database/repositories/translation";
 import {
   GetTranslationOpts,
   NewTranslation,
   Translation,
   TranslationUpdate,
-} from "../schemas/translation";
-import BaseFacade from "./base";
+} from "@/schemas/translation";
+import BaseFacade from "@/facades/base";
 
 export default class TranslationFacade extends BaseFacade<
   TranslationCacheRepository,

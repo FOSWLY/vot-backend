@@ -1,8 +1,8 @@
-import { TranslatedService } from "../types/translation";
-import { MissingRawVideoField, UnSupportedVideoLink } from "../errors";
-import MediaConverterService from "../services/mediaConverter";
-import { ServiceData } from "../types/videoExtrator/extractor";
-import { getPlaylist } from "./helper/epicgames";
+import { MissingRawVideoField, UnSupportedVideoLink } from "@/errors";
+import MediaConverterService from "@/services/mediaConverter";
+import { TranslatedService } from "@/types/translation";
+import { ServiceData } from "@/types/videoExtrator/extractor";
+import { getPlaylist } from "@/videoExtractor/helper/epicgames";
 
 const services: ServiceData = {
   mux: {

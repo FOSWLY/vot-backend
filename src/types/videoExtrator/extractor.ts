@@ -1,5 +1,5 @@
-import { ConvertFromFormat } from "../services/converter";
-import { TranslatedService } from "../translation";
+import { ConvertFromFormat } from "@/types/services/converter";
+import { TranslatedService } from "@/types/translation";
 
 export type HelperFunction = (url: string) => Promise<string>;
 

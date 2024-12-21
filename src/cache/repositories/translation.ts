@@ -1,12 +1,7 @@
-import config from "../../config";
-import { log } from "../../logging";
-import { GetTranslationOpts, Translation, TranslationUpdate } from "../../schemas/translation";
-import {
-  TranslatedService,
-  translatedServices,
-  TranslationProvider,
-} from "../../types/translation";
-import { cache } from "../cache";
+import config from "@/config";
+import { GetTranslationOpts, Translation, TranslationUpdate } from "@/schemas/translation";
+import { TranslatedService, translatedServices, TranslationProvider } from "@/types/translation";
+import { cache } from "@/cache/cache";
 import BaseRepository from "./base";
 
 export default class TranslationRepository extends BaseRepository {

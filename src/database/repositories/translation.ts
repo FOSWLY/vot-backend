@@ -1,12 +1,12 @@
-import { db } from "../database";
+import { db } from "@/database/database";
 import {
   TranslationUpdate,
   Translation,
   NewTranslation,
   GetTranslationOpts,
-} from "../../schemas/translation";
+} from "@/schemas/translation";
 import BaseRepository from "./base";
-import config from "../../config";
+import config from "@/config";
 
 export default class TranslationRepository extends BaseRepository {
   constructor() {

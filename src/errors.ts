@@ -1,4 +1,4 @@
-import { TranslatedService } from "./types/translation";
+import { TranslatedService } from "@/types/translation";
 
 export class UnAuthorizedError extends Error {
   constructor(unknownToken = false) {

@@ -1,14 +1,14 @@
 import { Elysia, t } from "elysia";
 
-import { videoTranslationModels } from "../../models/translation.model";
-import { translationQueue } from "../../worker";
-import TranslationFacade from "../../facades/translation";
-import config from "../../config";
-import { generatePreSigned, deleteAudio } from "../../s3/actions";
-import { validateAuthToken } from "../../libs/security";
-import { getNavigationData, validateNavigation } from "../../libs/navigation";
-import { isValidId } from "../../libs/utils";
-import { TranslationNotFound } from "../../errors";
+import { videoTranslationModels } from "@/models/translation.model";
+import { translationQueue } from "@/worker";
+import TranslationFacade from "@/facades/translation";
+import config from "@/config";
+import { generatePreSigned, deleteAudio } from "@/s3/actions";
+import { validateAuthToken } from "@/libs/security";
+import { getNavigationData, validateNavigation } from "@/libs/navigation";
+import { isValidId } from "@/libs/utils";
+import { TranslationNotFound } from "@/errors";
 
 export default new Elysia().group("/video-translation", (app) =>
   app

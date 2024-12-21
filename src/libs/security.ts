@@ -1,4 +1,4 @@
-import { UnAuthorizedError } from "../errors";
+import { UnAuthorizedError } from "@/errors";
 
 export function validateAuthToken(authorization: string | undefined) {
   const token = authorization?.split("Basic")?.[1];

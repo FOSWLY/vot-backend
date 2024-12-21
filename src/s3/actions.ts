@@ -2,10 +2,10 @@ import { GetObjectCommand, PutObjectCommand, DeleteObjectCommand } from "@aws-sd
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import s3client from "./s3";
-import { log } from "../logging";
-import config from "../config";
+import { log } from "@/logging";
+import config from "@/config";
 
-const bucket = config.s3.bucket;
+const { bucket } = config.s3;
 const URL_LIFETIME = 7200; // 2 hours
 
 export async function saveAudio(filename: string, body: Uint8Array) {

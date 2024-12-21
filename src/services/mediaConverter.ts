@@ -1,12 +1,12 @@
-import config from "../config";
-import { fetchWithTimeout } from "../libs/network";
-import { log } from "../logging";
+import config from "@/config";
+import { fetchWithTimeout } from "@/libs/network";
+import { log } from "@/logging";
 import {
   ConvertDirection,
   ConverterErrorResponse,
   ConverterFinalResponse,
   ConverterResponse,
-} from "../types/services/converter";
+} from "@/types/services/converter";
 
 export default class MediaConverterService {
   static hostname: string = config.services.mediaConverter.hostname;

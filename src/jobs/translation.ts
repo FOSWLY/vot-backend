@@ -6,22 +6,22 @@ import { VideoData } from "@vot.js/core/types/client";
 import { v7 as uuidv7 } from "uuid";
 import { Job } from "bullmq";
 
-import config from "../config";
-import extractVideo from "../videoExtractor/extractor";
-import TranslateTextService from "../services/translateText";
+import config from "@/config";
+import extractVideo from "@/videoExtractor/extractor";
+import TranslateTextService from "@/services/translateText";
 
-import { log } from "../logging";
-import { deleteAudio, saveAudio } from "../s3/actions";
-import TranslationFacade from "../facades/translation";
-import { FailedExtractVideo } from "../errors";
+import { log } from "@/logging";
+import { deleteAudio, saveAudio } from "@/s3/actions";
+import TranslationFacade from "@/facades/translation";
+import { FailedExtractVideo } from "@/errors";
 import {
   ConverterErrorResponse,
   ConverterFinalResponse,
   ConverterResponse,
   ConverterWaitingResponse,
-} from "../types/services/converter";
-import { TranslationJobOpts, TranslationProgress } from "../types/translation";
-import { fetchWithTimeout } from "../libs/network";
+} from "@/types/services/converter";
+import { TranslationJobOpts, TranslationProgress } from "@/types/translation";
+import { fetchWithTimeout } from "@/libs/network";
 
 function isSuccessMediaRes(mediaRes: ConverterResponse | null): mediaRes is ConverterFinalResponse {
   return !(
