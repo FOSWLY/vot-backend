@@ -1,6 +1,8 @@
-import { VOTWorkerClient } from "vot.js";
-import { YandexType, ClientType } from "vot.js/types";
-import { getVideoData } from "vot.js/utils/videoData";
+import { VOTWorkerClient } from "@vot.js/node";
+import { getVideoData } from "@vot.js/node/utils/videoData";
+import { TranslationHelp, TranslatedVideoTranslationResponse } from "@vot.js/core/types/yandex";
+import { VideoData } from "@vot.js/core/types/client";
+
 import { v7 as uuidv7 } from "uuid";
 import { Job } from "bullmq";
 
@@ -18,14 +20,11 @@ import {
   ConverterResponse,
   ConverterWaitingResponse,
 } from "../types/services/converter";
-import { TranslateTextSuccessResponse } from "../types/services/translateText";
 import { TranslationJobOpts, TranslationProgress } from "../types/translation";
 import { fetchWithTimeout } from "../libs/network";
 
-function isFailedMediaRes(
-  mediaRes: ConverterResponse | null,
-): mediaRes is null | ConverterWaitingResponse | ConverterErrorResponse {
-  return (
+function isSuccessMediaRes(mediaRes: ConverterResponse | null): mediaRes is ConverterFinalResponse {
+  return !(
     !mediaRes ||
     !!(mediaRes as ConverterErrorResponse)?.error ||
     (mediaRes as ConverterWaitingResponse)?.status !== "success"
@@ -44,10 +43,10 @@ export default abstract class TranslationJob {
   static async translateVideoImpl(
     client: VOTWorkerClient,
     job: Job<TranslationJobOpts>,
-    videoData: ClientType.VideoData,
+    videoData: VideoData,
     timer: ReturnType<typeof setTimeout> | undefined = undefined,
-    translationHelp: YandexType.TranslationHelp[] | null = null,
-  ): Promise<YandexType.VideoTranslationResponse> {
+    translationHelp: TranslationHelp[] | null = null,
+  ): Promise<TranslatedVideoTranslationResponse> {
     clearTimeout(timer);
     const res = await client.translateVideo({
       videoData,
@@ -90,7 +89,7 @@ export default abstract class TranslationJob {
 
   static async uploadTranslatedAudio(url: string, service: string) {
     try {
-      log.debug({ url, service }, "fetching translated audio");
+      log.debug({ url, service }, "Fetching translated audio");
 
       const res = await fetchWithTimeout(url, {
         headers: {
@@ -103,7 +102,7 @@ export default abstract class TranslationJob {
       const uint8arr = new Uint8Array(blob);
 
       const path = `${TranslationJob.s3prefix}/${service}/${uuidv7()}.mp3`;
-      log.debug({ url, service }, "saving translated audio to s3");
+      log.debug({ url, service }, "Saving translated audio to s3");
       const s3result = await saveAudio(path, uint8arr);
       if (!s3result.success) {
         throw new Error(`Failed to upload audio to s3 bucket. Possible error: ${s3result.message}`);
@@ -139,7 +138,7 @@ export default abstract class TranslationJob {
     await job.updateProgress(TranslationProgress.VIDEO_PROCESSING);
 
     const mediaRes = await extractVideo(service, rawVideo);
-    if (isFailedMediaRes(mediaRes)) {
+    if (!isSuccessMediaRes(mediaRes)) {
       throw new FailedExtractVideo(
         (mediaRes as ConverterWaitingResponse)?.message ??
           (mediaRes as ConverterErrorResponse)?.error,
@@ -153,15 +152,11 @@ export default abstract class TranslationJob {
     });
 
     // в случае ошибки сразу падает в onError, поэтому обрабатывать не надо
-    const videoData = await getVideoData((mediaRes as ConverterFinalResponse).download_url);
+    const videoData = await getVideoData(mediaRes.download_url);
     const translateRes = await TranslationJob.translateVideoImpl(client, job, videoData);
     await job.updateProgress(TranslationProgress.DOWNLOAD_TRANSLATION);
 
-    const path = await TranslationJob.uploadTranslatedAudio(
-      (translateRes as YandexType.TranslatedVideoTranslationResponse).url,
-      service,
-    );
-
+    const path = await TranslationJob.uploadTranslatedAudio(translateRes.url, service);
     if (!path) {
       throw new Error("Failed to upload translated audio");
     }
@@ -205,10 +200,7 @@ export default abstract class TranslationJob {
     const { service, videoId, fromLang, toLang, provider } = job.data;
     // в бд храним только русские сообщения
     const translateRes = await TranslateTextService.translate(message, "en-ru");
-    const translatedMessage =
-      translateRes && Object.hasOwn(translateRes, "text")
-        ? (translateRes as TranslateTextSuccessResponse).text[0]
-        : message;
+    const translatedMessage = translateRes ? translateRes.translations[0] : message;
 
     await new TranslationFacade().update(
       { service, video_id: videoId, provider, lang_from: fromLang, lang_to: toLang },

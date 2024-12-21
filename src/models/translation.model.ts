@@ -1,6 +1,6 @@
 import Elysia, { t } from "elysia";
 
-import { availableLangs, availableTTS } from "vot.js/consts";
+import { availableLangs, availableTTS } from "@vot.js/shared/consts";
 import { translatedServices } from "../types/translation";
 
 const FromLang = t.Union(availableLangs.map((lang) => t.Literal(lang)));

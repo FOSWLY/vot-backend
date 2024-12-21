@@ -1,14 +1,15 @@
-import { YandexType } from "vot.js/types";
+import { RequestLang, ResponseLang } from "@vot.js/shared/types/data";
+import { VideoService } from "@vot.js/core/types/service";
 
 export const translatedServices = [
+  VideoService.reddit,
+  VideoService.kodik,
+  VideoService.kick,
+  VideoService.apple_developer,
+  VideoService.epicgames,
+  VideoService.nineanimetv,
   "mux",
-  "reddit",
-  "kodik",
-  "kick",
-  "apple_developer",
-  "epicgames",
   "artstation",
-  "nineanimetv",
 ] as const;
 export type TranslatedService = (typeof translatedServices)[number];
 export type TranslationStatus = "success" | "waiting" | "parted" | "failed";
@@ -18,8 +19,8 @@ export type TranslationJobOpts = {
   hasOldTranslation: boolean;
   service: TranslatedService;
   videoId: string;
-  fromLang: YandexType.RequestLang;
-  toLang: YandexType.ResponseLang;
+  fromLang: RequestLang;
+  toLang: ResponseLang;
   rawVideo?: string;
   provider: TranslationProvider;
   remainingTime?: number;
