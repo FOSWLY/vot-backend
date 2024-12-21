@@ -1,25 +1,39 @@
+import type { ClientType, BaseProviderType } from "@toil/translate/types";
+
 import config from "../config";
 import { fetchWithTimeout } from "../libs/network";
-import { TranslateTextResponse, TranslateLang } from "../types/services/translateText";
+import { FOSWLYErrorResponse } from "../types/services/translateText";
+import { log } from "../logging";
 
 export default class TranslateTextService {
   static hostname: string = config.services.translateText.hostname;
 
-  static async translate(text: string, lang: TranslateLang): Promise<TranslateTextResponse | null> {
+  static isFOSWLYError<T extends object>(
+    data: T | FOSWLYErrorResponse,
+  ): data is FOSWLYErrorResponse {
+    return Object.hasOwn(data, "error");
+  }
+
+  static async translate(text: string, lang: ClientType.LangPair) {
     try {
       const urlParams = new URLSearchParams({
         text,
         lang,
       }).toString();
-      const res = await fetchWithTimeout(`${this.hostname}/translate?${urlParams}`, {
+      const res = await fetchWithTimeout(`${this.hostname}/v2/translate?${urlParams}`, {
         headers: {
           "Content-Type": "application/json",
         },
       });
 
-      return (await res.json()) as TranslateTextResponse;
+      const data = (await res.json()) as FOSWLYErrorResponse | BaseProviderType.TranslationResponse;
+      if (TranslateTextService.isFOSWLYError(data)) {
+        throw new Error(data.error);
+      }
+
+      return data;
     } catch (err) {
-      console.error(`Failed to translate text "${text}"`, err);
+      log.error(`Failed to translate text "${text}"`, err);
       return null;
     }
   }
