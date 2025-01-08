@@ -1,15 +1,17 @@
 import { Elysia } from "elysia";
 
 import config from "@/config";
+import { healthModels } from "@/models/health.model";
 
 export default new Elysia().group("/health", (app) =>
-  app.get(
+  app.use(healthModels).get(
     "/",
     () => ({
       version: config.app.version,
-      status: "ok",
+      status: "ok" as const,
     }),
     {
+      response: "health",
       detail: {
         summary: "Get health",
         tags: ["Health"],
