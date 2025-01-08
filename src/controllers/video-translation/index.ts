@@ -4,7 +4,7 @@ import { videoTranslationModels } from "@/models/translation.model";
 import { translationQueue } from "@/worker";
 import TranslationFacade from "@/facades/translation";
 import config from "@/config";
-import { generatePreSigned, deleteAudio } from "@/s3/actions";
+import { generatePreSigned, deleteAudio, massDeleteAudio } from "@/s3/actions";
 import { validateAuthToken } from "@/libs/security";
 import { getNavigationData, validateNavigation } from "@/libs/navigation";
 import { isValidId } from "@/libs/utils";
@@ -169,6 +169,38 @@ export default new Elysia().group("/video-translation", (app) =>
               params: "video-translation.delete-translate",
               detail: {
                 summary: "Delete translated video by id",
+                tags: ["Translate"],
+              },
+            },
+          )
+          .delete(
+            "/translate",
+            async ({ body: { service, status, toLang, fromLang, provider, created_before } }) => {
+              const translations = await new TranslationFacade().massDelete({
+                service,
+                status,
+                lang_to: toLang,
+                lang_from: fromLang,
+                provider,
+                created_before,
+              });
+
+              if (translations?.length) {
+                const filenames = translations
+                  .filter((translation) => translation.translated_url)
+                  .map((translation) => translation.translated_url!);
+                await massDeleteAudio(filenames);
+              }
+
+              const count = translations?.length ?? 0;
+              return {
+                count,
+              };
+            },
+            {
+              body: "video-translation.mass-delete.body",
+              detail: {
+                summary: "Mass delete translations",
                 tags: ["Translate"],
               },
             },

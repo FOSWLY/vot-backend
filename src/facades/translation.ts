@@ -2,6 +2,7 @@ import TranslationCacheRepository from "@/cache/repositories/translation";
 import TranslationDBRepository from "@/database/repositories/translation";
 import {
   GetTranslationOpts,
+  MassDeleteTranslationOpts,
   NewTranslation,
   Translation,
   TranslationUpdate,
@@ -110,5 +111,18 @@ export default class TranslationFacade extends BaseFacade<
     });
 
     return result as Translation | undefined;
+  }
+
+  async massDelete(
+    criteria: Partial<MassDeleteTranslationOpts>,
+  ): Promise<Translation[] | undefined> {
+    const results = await this.dbRepository.massDelete(criteria);
+    if (!results) {
+      return;
+    }
+
+    await Promise.all(results.map(async (result) => await this.cacheRepository.delete(result)));
+
+    return results as Translation[] | undefined;
   }
 }

@@ -1,6 +1,7 @@
 import { ColumnType, Generated, Insertable, Selectable, Updateable } from "kysely";
 
-import { TranslatedService, TranslationProvider, TranslationStatus } from "@/types/translation";
+import { TranslatedService } from "@/types/translation";
+import type { TranslationProvider, TranslationStatus } from "@/models/translation.model";
 
 export interface TranslationTable {
   id: Generated<number>;
@@ -25,3 +26,10 @@ export type GetTranslationOpts = Pick<
   Translation,
   "service" | "video_id" | "provider" | "lang_from" | "lang_to"
 >;
+
+export type MassDeleteTranslationOpts = Pick<
+  Translation,
+  "service" | "lang_from" | "lang_to" | "provider" | "status"
+> & {
+  created_before: Date;
+};

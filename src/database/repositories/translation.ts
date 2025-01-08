@@ -4,6 +4,7 @@ import {
   Translation,
   NewTranslation,
   GetTranslationOpts,
+  MassDeleteTranslationOpts,
 } from "@/schemas/translation";
 import BaseRepository from "./base";
 import config from "@/config";
@@ -136,5 +137,34 @@ export default class TranslationRepository extends BaseRepository {
 
   async deleteById(id: number) {
     return await db.deleteFrom(this.dbName).where("id", "=", id).returningAll().executeTakeFirst();
+  }
+
+  async massDelete(criteria: Partial<MassDeleteTranslationOpts> = {}) {
+    let query = db.deleteFrom(this.dbName);
+    if (criteria.status) {
+      query = query.where("status", "=", criteria.status);
+    }
+
+    if (criteria.service) {
+      query = query.where("service", "=", criteria.service);
+    }
+
+    if (criteria.provider) {
+      query = query.where("provider", "=", criteria.provider);
+    }
+
+    if (criteria.lang_from) {
+      query = query.where("lang_from", "=", criteria.lang_from);
+    }
+
+    if (criteria.lang_to) {
+      query = query.where("lang_to", "=", criteria.lang_to);
+    }
+
+    if (criteria.created_before) {
+      query = query.where("created_at", "<", criteria.created_before);
+    }
+
+    return await query.returningAll().execute();
   }
 }
