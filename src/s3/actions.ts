@@ -1,4 +1,9 @@
-import { GetObjectCommand, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import {
+  GetObjectCommand,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  DeleteObjectsCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import s3client from "./s3";
@@ -25,7 +30,7 @@ export async function saveAudio(filename: string, body: Uint8Array) {
       success: results.$metadata.httpStatusCode === 200,
       etag: results.ETag,
     };
-  } catch (err: unknown) {
+  } catch (err) {
     const message = (err as Error).message;
     log.error(
       {
@@ -54,13 +59,45 @@ export async function deleteAudio(filename: string) {
       statusCode: results.$metadata.httpStatusCode,
       success: results.$metadata.httpStatusCode === 204,
     };
-  } catch (err: unknown) {
+  } catch (err) {
     const message = (err as Error).message;
     log.error(
       {
         err: message,
       },
       `Failed to delete audio file (${filename}) from s3 bucket ${bucket}`,
+    );
+    return {
+      success: false,
+      message,
+    };
+  }
+}
+
+export async function massDeleteAudio(filenames: string[]) {
+  try {
+    const results = await s3client.send(
+      new DeleteObjectsCommand({
+        Bucket: bucket,
+        Delete: {
+          Objects: filenames.map((filename) => ({ Key: filename })),
+        },
+      }),
+    );
+
+    log.debug(`Successfully deleted ${filenames.length} audio files from ${bucket} bucket`);
+    return {
+      statusCode: results.$metadata.httpStatusCode,
+      success: results.$metadata.httpStatusCode === 204,
+    };
+  } catch (err) {
+    const message = (err as Error).message;
+    log.error(
+      {
+        err: message,
+        filenames,
+      },
+      `Failed to delete ${filenames.length} audio files from s3 bucket ${bucket}`,
     );
     return {
       success: false,
