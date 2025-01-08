@@ -17,7 +17,7 @@ export const LoggingLevel = t.Union(
 );
 
 const license = "MIT";
-const scalarCDN = "https://unpkg.com/@scalar/api-reference@1.25.64/dist/browser/standalone.js";
+const scalarCDN = "https://unpkg.com/@scalar/api-reference@latest/dist/browser/standalone.js";
 
 export const ConfigSchema = t.Object({
   server: t.Object({
