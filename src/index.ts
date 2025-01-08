@@ -28,6 +28,11 @@ const app = new Elysia({ prefix: "/v1" })
     swagger({
       path: "/docs",
       scalarCDN: config.app.scalarCDN,
+      scalarConfig: {
+        spec: {
+          url: "/v1/docs/json",
+        },
+      },
       documentation: {
         info: {
           title: config.app.name,
@@ -81,7 +86,7 @@ const app = new Elysia({ prefix: "/v1" })
     }
 
     return {
-      error: error.message,
+      error: (error as Error).message,
     };
   })
   .use(healthController)
