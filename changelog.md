@@ -1,6 +1,20 @@
+# 1.2.1
+
+- The database schema (vot_translations) has been changed
+
+  `id` BigInt -> integer
+
+- Added mass delete translations with `DELETE /v1/video-translation/translate` (auth required)
+- Improved documentation
+- Fixed empty documentation on `GET /v1/docs`
+- Fixed typings for `TranslatedService`, `FromLang` and `ToLang`
+- Updated Scalar API Reference library to always use latest version
+- Updated Elysia to 1.2.6
+- Updated other depends
+
 # 1.2.0
 
-- The database schema has been changed
+- The database schema (vot_translations) has been changed
 
   `id` serial -> BigInt (identity column)
   `created_at` timestamp -> timestamptz
