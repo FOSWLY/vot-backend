@@ -8,7 +8,7 @@ import config from "@/config";
 import { generatePreSigned, deleteAudio, massDeleteAudio } from "@/s3/actions";
 import { validateAuthToken } from "@/libs/security";
 import { getNavigationData, validateNavigation } from "@/libs/navigation";
-import { isValidId } from "@/libs/utils";
+import { chunks, isValidId } from "@/libs/utils";
 import { TranslationNotFound } from "@/errors";
 
 export default new Elysia().group("/video-translation", (app) =>
@@ -207,7 +207,11 @@ export default new Elysia().group("/video-translation", (app) =>
                 const filenames = translations
                   .filter((translation) => translation.translated_url)
                   .map((translation) => translation.translated_url!);
-                await massDeleteAudio(filenames);
+
+                const chunkedFilenames = chunks(filenames, 900);
+                await Promise.all(
+                  chunkedFilenames.map(async (chunk) => await massDeleteAudio(chunk)),
+                );
               }
 
               const count = translations?.length ?? 0;

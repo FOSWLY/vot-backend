@@ -74,6 +74,9 @@ export async function deleteAudio(filename: string) {
   }
 }
 
+/**
+ * Maximum: 1000 filenames per requests
+ */
 export async function massDeleteAudio(filenames: string[]) {
   try {
     const results = await s3client.send(
