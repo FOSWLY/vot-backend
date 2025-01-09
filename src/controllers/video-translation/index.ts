@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 
 import { videoTranslationModels } from "@/models/translation.model";
+import { coreModels } from "@/models/core.model";
 import { translationQueue } from "@/worker";
 import TranslationFacade from "@/facades/translation";
 import config from "@/config";
@@ -12,6 +13,7 @@ import { TranslationNotFound } from "@/errors";
 
 export default new Elysia().group("/video-translation", (app) =>
   app
+    .use(coreModels)
     .use(videoTranslationModels)
     .post(
       "/translate",
@@ -82,7 +84,10 @@ export default new Elysia().group("/video-translation", (app) =>
         };
       },
       {
-        body: "video-translation.translate",
+        body: "video-translation.translate.body",
+        response: {
+          200: "video-translation.translate.response",
+        },
         detail: {
           summary: "Translate video from service",
           tags: ["Translate"],
@@ -91,9 +96,13 @@ export default new Elysia().group("/video-translation", (app) =>
     )
     .guard(
       {
+        response: {
+          401: "not-authenticated",
+        },
         headers: t.Object({
           authorization: t.String({
-            title: "Authorization Basic token",
+            description: "Authorization Basic token",
+            default: "Basic <token>",
           }),
         }),
         beforeHandle: ({ headers: { authorization } }) => {
@@ -118,7 +127,8 @@ export default new Elysia().group("/video-translation", (app) =>
               };
             },
             {
-              query: "video-translation.list",
+              query: "video-translation.list.query",
+              response: "video-translation.list.response",
               detail: {
                 summary: "Get list of translates",
                 tags: ["Translate"],
@@ -140,7 +150,11 @@ export default new Elysia().group("/video-translation", (app) =>
               return translation;
             },
             {
-              params: "video-translation.get-translate-by-id",
+              params: "video-translation.get-translate-by-id.params",
+              response: {
+                200: "video-translation.get-translate-by-id.response",
+                404: "video-translation.not-found",
+              },
               detail: {
                 summary: "Get info about translation by id",
                 tags: ["Translate"],
@@ -166,7 +180,11 @@ export default new Elysia().group("/video-translation", (app) =>
               return translation;
             },
             {
-              params: "video-translation.delete-translate",
+              params: "video-translation.delete-translate.params",
+              response: {
+                200: "video-translation.delete-translate.response",
+                404: "video-translation.not-found",
+              },
               detail: {
                 summary: "Delete translated video by id",
                 tags: ["Translate"],
@@ -199,6 +217,7 @@ export default new Elysia().group("/video-translation", (app) =>
             },
             {
               body: "video-translation.mass-delete.body",
+              response: { 200: "video-translation.mass-delete.response" },
               detail: {
                 summary: "Mass delete translations",
                 tags: ["Translate"],
