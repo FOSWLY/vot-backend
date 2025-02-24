@@ -5,13 +5,17 @@ import { coreModels } from "@/models/core.model";
 import { translationQueue } from "@/worker";
 import TranslationFacade from "@/facades/translation";
 import config from "@/config";
-import { generatePreSigned, deleteAudio, massDeleteAudio } from "@/s3/actions";
+import { generatePreSigned, deleteFile, massDeleteFiles } from "@/s3/actions";
 import { validateAuthToken } from "@/libs/security";
 import { getNavigationData, validateNavigation } from "@/libs/navigation";
 import { chunks, isValidId } from "@/libs/utils";
 import { TranslationNotFound } from "@/errors";
 
-export default new Elysia().group("/video-translation", (app) =>
+export default new Elysia({
+  detail: {
+    tags: ["Translate"],
+  },
+}).group("/video-translation", (app) =>
   app
     .use(coreModels)
     .use(videoTranslationModels)
@@ -90,7 +94,6 @@ export default new Elysia().group("/video-translation", (app) =>
         },
         detail: {
           summary: "Translate video from service",
-          tags: ["Translate"],
         },
       },
     )
@@ -131,7 +134,6 @@ export default new Elysia().group("/video-translation", (app) =>
               response: "video-translation.list.response",
               detail: {
                 summary: "Get list of translates",
-                tags: ["Translate"],
               },
             },
           )
@@ -157,7 +159,6 @@ export default new Elysia().group("/video-translation", (app) =>
               },
               detail: {
                 summary: "Get info about translation by id",
-                tags: ["Translate"],
               },
             },
           )
@@ -174,7 +175,7 @@ export default new Elysia().group("/video-translation", (app) =>
               }
 
               if (translation?.translated_url) {
-                await deleteAudio(translation.translated_url);
+                await deleteFile(translation.translated_url);
               }
 
               return translation;
@@ -187,7 +188,6 @@ export default new Elysia().group("/video-translation", (app) =>
               },
               detail: {
                 summary: "Delete translated video by id",
-                tags: ["Translate"],
               },
             },
           )
@@ -209,8 +209,8 @@ export default new Elysia().group("/video-translation", (app) =>
                   .map((translation) => translation.translated_url!);
 
                 const chunkedFilenames = chunks(filenames, 900);
-                await Promise.all(
-                  chunkedFilenames.map(async (chunk) => await massDeleteAudio(chunk)),
+                await Promise.allSettled(
+                  chunkedFilenames.map(async (chunk) => await massDeleteFiles(chunk)),
                 );
               }
 
@@ -224,7 +224,6 @@ export default new Elysia().group("/video-translation", (app) =>
               response: { 200: "video-translation.mass-delete.response" },
               detail: {
                 summary: "Mass delete translations",
-                tags: ["Translate"],
               },
             },
           ),
