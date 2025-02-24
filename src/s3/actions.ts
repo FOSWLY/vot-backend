@@ -6,21 +6,24 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-import s3client from "./s3";
+import s3client, { s3PreSignedClient } from "./s3";
 import { log } from "@/logging";
 import config from "@/config";
 
-const { bucket } = config.s3;
-const URL_LIFETIME = 7200; // 2 hours
+const { bucket, lifeTime } = config.s3;
 
-export async function saveAudio(filename: string, body: Uint8Array) {
+export async function saveFile(
+  filename: string,
+  body: Uint8Array,
+  contentType = "application/mpeg",
+) {
   try {
     const results = await s3client.send(
       new PutObjectCommand({
         Bucket: bucket,
         Key: filename,
         Body: body,
-        ContentType: "application/mpeg",
+        ContentType: contentType,
       }),
     );
 
@@ -36,7 +39,7 @@ export async function saveAudio(filename: string, body: Uint8Array) {
       {
         err: message,
       },
-      `Failed to save audio file (${filename}) to s3 bucket ${bucket}`,
+      `Failed to save file (${filename}) to s3 bucket ${bucket}`,
     );
     return {
       success: false,
@@ -45,7 +48,7 @@ export async function saveAudio(filename: string, body: Uint8Array) {
   }
 }
 
-export async function deleteAudio(filename: string) {
+export async function deleteFile(filename: string) {
   try {
     const results = await s3client.send(
       new DeleteObjectCommand({
@@ -65,7 +68,7 @@ export async function deleteAudio(filename: string) {
       {
         err: message,
       },
-      `Failed to delete audio file (${filename}) from s3 bucket ${bucket}`,
+      `Failed to delete file (${filename}) from s3 bucket ${bucket}`,
     );
     return {
       success: false,
@@ -77,7 +80,7 @@ export async function deleteAudio(filename: string) {
 /**
  * Maximum: 1000 filenames per requests
  */
-export async function massDeleteAudio(filenames: string[]) {
+export async function massDeleteFiles(filenames: string[]) {
   try {
     const results = await s3client.send(
       new DeleteObjectsCommand({
@@ -88,7 +91,7 @@ export async function massDeleteAudio(filenames: string[]) {
       }),
     );
 
-    log.debug(`Successfully deleted ${filenames.length} audio files from ${bucket} bucket`);
+    log.debug(`Successfully deleted ${filenames.length} files from ${bucket} bucket`);
     return {
       statusCode: results.$metadata.httpStatusCode,
       success: results.$metadata.httpStatusCode === 204,
@@ -113,8 +116,8 @@ export async function generatePreSigned(filename: string) {
   try {
     const command = new GetObjectCommand({ Bucket: bucket, Key: filename });
 
-    return await getSignedUrl(s3client, command, {
-      expiresIn: URL_LIFETIME,
+    return await getSignedUrl(s3PreSignedClient, command, {
+      expiresIn: lifeTime,
       unhoistableHeaders: new Set("x-id"),
     });
   } catch (err) {
