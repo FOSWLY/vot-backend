@@ -1,3 +1,7 @@
+# 1.3.1
+
+- Renamed `videoId` field to `video_id` in `POST video-subtitles/get-subtitles` body
+
 # 1.3.0
 
 - (!) Path `/video-translate/translate` body has migrated from camelCase to snake_case. It needs to unify all requests and responses body. Now, it's available if you set "X-Use-Snake-Case": "Yes" to headers, but in the next major release support for camelCase will be removed

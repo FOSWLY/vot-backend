@@ -19,10 +19,10 @@ export default new Elysia({
     .use(videoSubtitleModels)
     .post(
       "/get-subtitles",
-      async ({ body: { service, videoId, provider } }) => {
+      async ({ body: { service, video_id, provider } }) => {
         const subtitles = await new SubtitleFacade().get({
           service,
-          video_id: videoId.toString(),
+          video_id: video_id.toString(),
           provider,
         });
 

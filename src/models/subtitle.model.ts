@@ -35,7 +35,7 @@ export const Subtitle = t.Object({
 export const videoSubtitleModels = new Elysia().model({
   "video-subtitles.get-subtitle.body": t.Object({
     service: TranslatedService,
-    videoId: VideoId,
+    video_id: VideoId,
     provider: TranslationProvider,
   }),
   "video-subtitles.get-subtitle.response": t.Array(Subtitle),
