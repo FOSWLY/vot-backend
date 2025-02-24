@@ -3,6 +3,7 @@
 # docker files
 redis/*
 db/*
+minio/*
 
 .env
 .local.env

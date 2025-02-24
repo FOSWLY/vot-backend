@@ -8,6 +8,7 @@ logs/*
 tests/*
 redis/*
 db/*
+minio/*
 
 Dockerfile
 docker-compose.yml
