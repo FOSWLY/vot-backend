@@ -1,4 +1,4 @@
-import * as fs from "fs";
+import fs from "node:fs/promises";
 
 import { Elysia } from "elysia";
 import { swagger } from "@elysiajs/swagger";
@@ -8,6 +8,7 @@ import config from "@/config";
 
 import healthController from "@/controllers/health";
 import videoTranslation from "@/controllers/video-translation";
+import videoSubtitles from "@/controllers/video-subtitles";
 import { log } from "@/logging";
 import {
   InternalServerError,
@@ -16,10 +17,11 @@ import {
   UnSupportedVideoLink,
   FailedExtractVideo,
   TranslationNotFound,
+  SubtitleNotFound,
 } from "@/errors";
 
-if (!fs.existsSync(config.logging.logPath)) {
-  fs.mkdirSync(config.logging.logPath, { recursive: true });
+if (config.logging.logToFile && !(await fs.exists(config.logging.logPath))) {
+  await fs.mkdir(config.logging.logPath, { recursive: true });
   log.info(`Created log directory`);
 }
 
@@ -62,6 +64,7 @@ const app = new Elysia({ prefix: "/v1" })
     UNSUPPORTED_VIDEO_LINK: UnSupportedVideoLink,
     FAILED_EXTRACT_VIDEO: FailedExtractVideo,
     TRANSLATION_NOT_FOUND: TranslationNotFound,
+    SUBTITLE_NOT_FOUND: SubtitleNotFound,
   })
   .onError(({ set, code, error, httpStatus }) => {
     switch (code) {
@@ -81,6 +84,7 @@ const app = new Elysia({ prefix: "/v1" })
         set.status = httpStatus.HTTP_400_BAD_REQUEST;
         break;
       case "TRANSLATION_NOT_FOUND":
+      case "SUBTITLE_NOT_FOUND":
         set.status = httpStatus.HTTP_404_NOT_FOUND;
         break;
     }
@@ -91,6 +95,7 @@ const app = new Elysia({ prefix: "/v1" })
   })
   .use(healthController)
   .use(videoTranslation)
+  .use(videoSubtitles)
   .listen({
     port: config.server.port,
     hostname: config.server.hostname,

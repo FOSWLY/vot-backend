@@ -35,3 +35,9 @@ export class TranslationNotFound extends Error {
     super(`The requested translation wasn't found!`);
   }
 }
+
+export class SubtitleNotFound extends Error {
+  constructor() {
+    super(`The requested subtitle wasn't found!`);
+  }
+}

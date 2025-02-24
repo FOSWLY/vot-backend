@@ -3,15 +3,14 @@ import { getVideoData } from "@vot.js/node/utils/videoData";
 import { TranslationHelp, TranslatedVideoTranslationResponse } from "@vot.js/core/types/yandex";
 import { VideoData } from "@vot.js/core/types/client";
 
-import { v7 as uuidv7 } from "uuid";
+import { randomUUIDv7 } from "bun";
 import { Job } from "bullmq";
 
-import config from "@/config";
 import extractVideo from "@/videoExtractor/extractor";
 import TranslateTextService from "@/services/translateText";
 
 import { log } from "@/logging";
-import { deleteAudio, saveAudio } from "@/s3/actions";
+import { deleteFile, saveFile } from "@/s3/actions";
 import TranslationFacade from "@/facades/translation";
 import { FailedExtractVideo } from "@/errors";
 import {
@@ -22,6 +21,8 @@ import {
 } from "@/types/services/converter";
 import { TranslationJobOpts, TranslationProgress } from "@/types/translation";
 import { fetchWithTimeout } from "@/libs/network";
+import SubtitleFacade from "@/facades/subtitle";
+import { VideoService } from "@vot.js/core/types/service";
 
 function isSuccessMediaRes(mediaRes: ConverterResponse | null): mediaRes is ConverterFinalResponse {
   return !(
@@ -32,7 +33,8 @@ function isSuccessMediaRes(mediaRes: ConverterResponse | null): mediaRes is Conv
 }
 
 export default abstract class TranslationJob {
-  static s3prefix = "vtrans";
+  static s3AudioPrefix = "vtrans";
+  static s3SubPrefix = "vsubs";
 
   private static messageByProgress = {
     [TranslationProgress.VIDEO_PROCESSING]: "Видео передано в обработку",
@@ -69,16 +71,9 @@ export default abstract class TranslationJob {
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       timer = setTimeout(async () => {
         try {
-          const res = await TranslationJob.translateVideoImpl(
-            client,
-            job,
-            videoData,
-            timer,
-            translationHelp,
+          resolve(
+            await TranslationJob.translateVideoImpl(client, job, videoData, timer, translationHelp),
           );
-          if (res.translated && res.remainingTime < 1) {
-            resolve(res);
-          }
         } catch (err) {
           // bullmq can't prevent timed out errors
           reject(err as Error);
@@ -87,30 +82,25 @@ export default abstract class TranslationJob {
     });
   }
 
-  static async uploadTranslatedAudio(url: string, service: string) {
+  static async uploadFile(url: string, service: string, prefix = TranslationJob.s3AudioPrefix) {
     try {
-      log.debug({ url, service }, "Fetching translated audio");
-
+      log.debug({ url, service }, "Fetching file");
       const res = await fetchWithTimeout(url, {
-        headers: {
-          "User-Agent": config.downloaders.userAgent,
-        },
         timeout: 60_000,
       });
 
       const blob = await res.arrayBuffer();
       const uint8arr = new Uint8Array(blob);
-
-      const path = `${TranslationJob.s3prefix}/${service}/${uuidv7()}.mp3`;
-      log.debug({ url, service }, "Saving translated audio to s3");
-      const s3result = await saveAudio(path, uint8arr);
+      const path = `${prefix}/${service}/${randomUUIDv7()}.mp3`;
+      log.debug({ url, service }, "Saving file to s3");
+      const s3result = await saveFile(path, uint8arr);
       if (!s3result.success) {
-        throw new Error(`Failed to upload audio to s3 bucket. Possible error: ${s3result.message}`);
+        throw new Error(`Failed to upload file to s3 bucket. Possible error: ${s3result.message}`);
       }
 
       return path;
-    } catch (err: unknown) {
-      log.error(`Failed to upload audio from ${url}`, (err as Error).message);
+    } catch (err) {
+      log.error(`Failed to upload file from ${url}. Possible error: ${(err as Error).message}`);
       return null;
     }
   }
@@ -129,7 +119,7 @@ export default abstract class TranslationJob {
     if (hasOldTranslation) {
       const old = await translationFacade.delete(getBy);
       if (old?.translated_url) {
-        await deleteAudio(old.translated_url);
+        await deleteFile(old.translated_url);
       }
     }
 
@@ -141,7 +131,8 @@ export default abstract class TranslationJob {
     if (!isSuccessMediaRes(mediaRes)) {
       throw new FailedExtractVideo(
         (mediaRes as ConverterWaitingResponse)?.message ??
-          (mediaRes as ConverterErrorResponse)?.error,
+          (mediaRes as ConverterErrorResponse)?.error ??
+          "media converter is unavailable",
       );
     }
 
@@ -151,15 +142,21 @@ export default abstract class TranslationJob {
       responseLang: toLang,
     });
 
-    // в случае ошибки сразу падает в onError, поэтому обрабатывать не надо
+    // в случае ошибки сразу падает в onError, поэтому обрабатывать не нужно
     const videoData = await getVideoData(mediaRes.download_url);
     const translateRes = await TranslationJob.translateVideoImpl(client, job, videoData);
     await job.updateProgress(TranslationProgress.DOWNLOAD_TRANSLATION);
 
-    const path = await TranslationJob.uploadTranslatedAudio(translateRes.url, service);
+    const path = await TranslationJob.uploadFile(
+      translateRes.url,
+      service,
+      TranslationJob.s3AudioPrefix,
+    );
     if (!path) {
       throw new Error("Failed to upload translated audio");
     }
+
+    await TranslationJob.addSubtitles(client, job, videoData);
 
     await translationFacade.update(
       { service, video_id: videoId, provider, lang_from: fromLang, lang_to: toLang },
@@ -170,6 +167,66 @@ export default abstract class TranslationJob {
         translated_url: path,
       },
     );
+  }
+
+  static async addSubtitles(
+    client: VOTWorkerClient,
+    job: Job<TranslationJobOpts>,
+    videoData: VideoData<VideoService>,
+  ) {
+    try {
+      const res = await client.getSubtitles({
+        videoData,
+      });
+      if (!res.subtitles.length) {
+        return false;
+      }
+
+      const { service, videoId, provider } = job.data;
+      const subtitleFacade = new SubtitleFacade();
+      const existsLangPairs = (
+        await subtitleFacade.getAll({
+          service,
+          video_id: videoId,
+          provider,
+        })
+      ).map((sub) => (sub.lang_from ? `${sub.lang_from}-${sub.lang}` : sub.lang));
+
+      const uploadAndAdd = async (url: string, lang: string, lang_from: string | null) => {
+        const path = await TranslationJob.uploadFile(url, service, TranslationJob.s3SubPrefix);
+        if (!path) {
+          return false;
+        }
+
+        await subtitleFacade.create({
+          lang: lang,
+          lang_from,
+          service,
+          provider,
+          video_id: videoId,
+          subtitle_url: path,
+        });
+      };
+
+      await Promise.allSettled(
+        res.subtitles.map(async (sub) => {
+          if (!existsLangPairs.includes(sub.language)) {
+            await uploadAndAdd(sub.url, sub.language, null);
+          }
+
+          if (
+            sub.translatedLanguage &&
+            !existsLangPairs.includes(`${sub.language}-${sub.translatedLanguage}`)
+          ) {
+            await uploadAndAdd(sub.translatedUrl, sub.translatedLanguage, sub.language);
+          }
+          return sub;
+        }),
+      );
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   static async onProgress(job: Job<TranslationJobOpts>, progress: number | object) {

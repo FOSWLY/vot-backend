@@ -62,13 +62,13 @@ export default class TranslationFacade extends BaseFacade<
 
   async update(getBy: GetTranslationOpts, updateWith: TranslationUpdate): Promise<boolean> {
     await this.dbRepository.update(getBy, updateWith);
-    const result = await this.dbRepository.get({
+    const result = (await this.dbRepository.get({
       service: updateWith.service ?? getBy.service,
       video_id: updateWith.video_id ?? getBy.video_id,
       provider: updateWith.provider ?? getBy.provider,
       lang_from: updateWith.lang_from ?? getBy.lang_from,
       lang_to: updateWith.lang_to ?? getBy.lang_to,
-    });
+    })) as Translation | undefined;
     if (!result) {
       await this.cacheRepository.delete(getBy);
       return false;
@@ -116,12 +116,14 @@ export default class TranslationFacade extends BaseFacade<
   async massDelete(
     criteria: Partial<MassDeleteTranslationOpts>,
   ): Promise<Translation[] | undefined> {
-    const results = await this.dbRepository.massDelete(criteria);
+    const results = (await this.dbRepository.massDelete(criteria)) as Translation[];
     if (!results) {
       return;
     }
 
-    await Promise.all(results.map(async (result) => await this.cacheRepository.delete(result)));
+    await Promise.allSettled(
+      results.map(async (result) => await this.cacheRepository.delete(result)),
+    );
 
     return results as Translation[] | undefined;
   }

@@ -1,7 +1,8 @@
 import { ColumnType, Generated, Insertable, Selectable, Updateable } from "kysely";
 
 import { TranslatedService } from "@/types/translation";
-import type { TranslationProvider, TranslationStatus } from "@/models/translation.model";
+import type { TranslationStatus } from "@/models/translation.model";
+import type { TranslationProvider } from "@/models/shared.model";
 
 export interface TranslationTable {
   id: Generated<number>;
