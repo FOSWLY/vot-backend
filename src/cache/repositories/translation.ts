@@ -1,11 +1,13 @@
 import config from "@/config";
 import { GetTranslationOpts, Translation, TranslationUpdate } from "@/schemas/translation";
-import { TranslatedService, translatedServices, TranslationProvider } from "@/types/translation";
+import { TranslatedService, translatedServices } from "@/types/translation";
+import type { TranslationProvider } from "@/models/shared.model";
 import { cache } from "@/cache/cache";
 import BaseRepository from "./base";
 
 export default class TranslationRepository extends BaseRepository {
   repositoryName = "translation";
+  dateFields = ["created_at"];
 
   private getField(
     video_id: string,
@@ -16,7 +18,7 @@ export default class TranslationRepository extends BaseRepository {
     return `${video_id}:${provider}:${lang_from}:${lang_to}`;
   }
 
-  private getKey(service: TranslatedService) {
+  getKey(service: TranslatedService) {
     return `${this.prefix}:${this.repositoryName}:${service}`;
   }
 
@@ -32,7 +34,7 @@ export default class TranslationRepository extends BaseRepository {
       this.getField(video_id, provider, lang_from, lang_to),
     );
 
-    return result ? (JSON.parse(result) as Translation) : undefined;
+    return this.reviveJSON<Translation>(result);
   }
 
   async getAll(
@@ -52,7 +54,7 @@ export default class TranslationRepository extends BaseRepository {
     let result = cachedResults.reduce((result, cached) => {
       const translations: Translation[] = Object.values(cached)
         .map((value) => {
-          const data = JSON.parse(value) as Translation;
+          const data = this.reviveJSON<Translation>(value);
           if (
             (criteria.id && data.id !== criteria.id) ??
             (criteria.video_id && data.video_id !== criteria.video_id) ??
