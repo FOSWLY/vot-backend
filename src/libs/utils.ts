@@ -1,5 +1,4 @@
-import { TLiteral } from "@sinclair/typebox";
-import { t } from "elysia";
+import { t, TSchema } from "elysia";
 
 export function getTime() {
   return Math.floor(Date.now() / 1000);
@@ -18,9 +17,9 @@ export function chunks<T extends unknown[] = string[]>(a: T, size: number): T[] 
 // https://github.com/sinclairzx81/typebox/issues/1135
 export type TStringsToLiterals<
   Strings extends string[],
-  Result extends TLiteral[] = [],
+  Result extends TSchema[] = [],
 > = Strings extends [infer Left extends string, ...infer Right extends string[]]
-  ? TStringsToLiterals<Right, [...Result, TLiteral<Left>]>
+  ? TStringsToLiterals<Right, [...Result, ReturnType<typeof t.Literal<Left>>]>
   : Result;
 
 export function StringsToLiterals<Strings extends string[]>(
