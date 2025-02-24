@@ -36,6 +36,13 @@ async function migrate() {
 
   if (error) {
     log.error("Failed to migrate");
+    if ((error as Error).message?.includes("2025-09-01-downgrade-id-to-int")) {
+      // remove old migration with wrong name
+      await db
+        .deleteFrom("kysely_migration" as any)
+        .where("name", "=", "2025-09-01-downgrade-id-to-int")
+        .executeTakeFirst();
+    }
     log.error(error);
     process.exit(1);
   }
