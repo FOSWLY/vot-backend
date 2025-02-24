@@ -18,6 +18,7 @@ export default Value.Parse(ConfigSchema, {
   logging: {
     level: Bun.env.NODE_ENV === "production" ? "info" : "debug",
     logPath: path.join(__dirname, "..", "logs"),
+    logToFile: Bun.env.LOG_TO_FILE === "true",
     loki: {
       host: Bun.env.LOKI_HOST,
       user: Bun.env.LOKI_USER,
@@ -52,9 +53,11 @@ export default Value.Parse(ConfigSchema, {
   s3: {
     region: Bun.env.S3_REGION,
     endpoint: Bun.env.S3_ENDPOINT,
+    preSignedEndpoint: Bun.env.S3_PRESIGNED_ENDPOINT || Bun.env.S3_ENDPOINT,
     bucket: Bun.env.S3_BUCKET,
     accessKeyID: Bun.env.S3_ACCESS_KEY_ID,
     secretAccessKey: Bun.env.S3_SECRET_ACCESS_KEY,
+    forcePathStyle: Bun.env.S3_FORCE_PATH_STYLE === "true",
   },
   navigation: {},
   downloaders: {},

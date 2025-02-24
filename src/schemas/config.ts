@@ -1,4 +1,5 @@
 import { Type as t, type Static } from "@sinclair/typebox";
+import { config } from "@vot.js/shared";
 
 import { version } from "../../package.json";
 
@@ -44,6 +45,7 @@ export const ConfigSchema = t.Object({
   logging: t.Object({
     level: LoggingLevel,
     logPath: t.String(),
+    logToFile: t.Boolean({ default: false }),
     loki: t.Object({
       host: t.String({ default: "" }),
       user: t.String({ default: "" }),
@@ -79,11 +81,14 @@ export const ConfigSchema = t.Object({
     ttl: t.Number({ default: 7200 }), // Only for DB caching. BullMQ uses own impl
   }),
   s3: t.Object({
-    region: t.String({ default: "ru-central1" }), // if you use other s3 provider change this region
-    endpoint: t.String({ default: "https://storage.yandexcloud.net" }),
-    bucket: t.String({ default: "example" }),
-    accessKeyID: t.String({ default: "" }),
-    secretAccessKey: t.String({ default: "" }),
+    region: t.String({ default: "eu-central-1" }), // if you use other s3 provider change this region
+    endpoint: t.String({ default: "http://127.0.0.1:9000" }),
+    preSignedEndpoint: t.String({ default: "http://127.0.0.1:9000" }),
+    lifeTime: t.Number({ default: 7200 }),
+    bucket: t.String({ default: "vot-backend" }),
+    accessKeyID: t.String({ default: "root" }),
+    secretAccessKey: t.String({ default: "changeme" }),
+    forcePathStyle: t.Boolean({ default: false }),
   }),
   navigation: t.Object({
     defaultLimit: t.Number({ default: 10 }),
@@ -92,8 +97,7 @@ export const ConfigSchema = t.Object({
   }),
   downloaders: t.Object({
     userAgent: t.String({
-      default:
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 YaBrowser/24.10.0.0 Safari/537.36",
+      default: config.userAgent,
     }),
   }),
 });
