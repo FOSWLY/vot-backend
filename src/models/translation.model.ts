@@ -55,38 +55,93 @@ export const Translation = t.Object({
   created_at: t.Date(),
 });
 
-export const videoTranslationModels = new Elysia().model({
-  "video-translation.translate.body": t.Object({
-    service: TranslatedService,
-    videoId: VideoId,
-    fromLang: FromLang,
-    toLang: ToLang,
-    rawVideo: t.Optional(
-      t.String({
-        format: "uri",
-        pattern: "^https://*",
-        minLength: 12,
-      }),
-    ),
-    provider: TranslationProvider,
+export const TranslateRequestBodyOld = t.Object({
+  // remove this object after some time
+  service: TranslatedService,
+  videoId: VideoId,
+  fromLang: FromLang,
+  toLang: ToLang,
+  rawVideo: t.Optional(
+    t.String({
+      format: "uri",
+      pattern: "^https://*",
+      minLength: 12,
+    }),
+  ),
+  provider: TranslationProvider,
+});
+export type TranslateRequestBodyOld = Static<typeof TranslateRequestBodyOld>;
+
+export const TranslateRequestBodyNew = t.Object({
+  // remove this object after some time
+  service: TranslatedService,
+  video_id: VideoId,
+  from_lang: FromLang,
+  to_lang: ToLang,
+  raw_video: t.Optional(
+    t.String({
+      format: "uri",
+      pattern: "^https://*",
+      minLength: 12,
+    }),
+  ),
+  provider: TranslationProvider,
+});
+export type TranslateRequestBodyNew = Static<typeof TranslateRequestBodyNew>;
+
+export const TranslateRequestBody = t.Union([TranslateRequestBodyOld, TranslateRequestBodyNew]);
+export type TranslateRequestBody = Static<typeof TranslateRequestBody>;
+
+export const TranslateResponseBodyOldFinished = t.Object({
+  id: t.Number(),
+  status: TranslationStatus,
+  provider: TranslationProvider,
+  translatedUrl: TranslatedUrl,
+  message: Message,
+  createdAt: t.Date(),
+});
+
+export const TranslateResponseBodyOldWaiting = t.Object({
+  status: t.Literal("waiting", {
+    examples: ["waiting"],
   }),
-  "video-translation.translate.response": t.Union([
-    t.Object({
-      id: t.Number(),
-      status: TranslationStatus,
-      provider: TranslationProvider,
-      translatedUrl: TranslatedUrl,
-      message: Message,
-      createdAt: t.Date(),
-    }),
-    t.Object({
-      status: t.Literal("waiting", {
-        examples: ["waiting"],
-      }),
-      remainingTime: RemainingTime,
-      message: Message,
-    }),
-  ]),
+  remainingTime: RemainingTime,
+  message: Message,
+});
+
+export const TranslateResponseBodyNewFinished = t.Object({
+  id: t.Number(),
+  status: TranslationStatus,
+  provider: TranslationProvider,
+  translated_url: TranslatedUrl,
+  message: Message,
+  created_at: t.Date(),
+});
+
+export const TranslateResponseBodyNewWaiting = t.Object({
+  status: t.Literal("waiting", {
+    examples: ["waiting"],
+  }),
+  remaining_time: RemainingTime,
+  message: Message,
+});
+
+export const TranslateResponseBody = t.Union([
+  TranslateResponseBodyOldFinished,
+  TranslateResponseBodyOldWaiting,
+  TranslateResponseBodyNewFinished,
+  TranslateResponseBodyNewWaiting,
+]);
+export type TranslateResponseBody = Static<typeof TranslateResponseBody>;
+
+export const TranslateRequestHeaders = t.Object({
+  "x-use-snake-case": t.Optional(t.Union([t.Literal("Yes"), t.Literal("No")])),
+});
+
+export const videoTranslationModels = new Elysia().model({
+  "video-translation.translate.body": TranslateRequestBody,
+  "video-translation.translate.headers": TranslateRequestHeaders,
+  "video-translation.translate.response": TranslateResponseBody,
   "video-translation.list.query": NavigationParams,
   "video-translation.list.response": t.Object({
     translations: t.Array(Translation),
