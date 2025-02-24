@@ -1,6 +1,6 @@
 # 1.3.0
 
-- (!) Path `/video-translate/translate` body has migrated from camelCase to snake_case. It needs to unify all requests and responses body. Now, it's available if you set "X-Use-Snake-Case": "1" to headers, but in the next major release support for camelCase will be removed
+- (!) Path `/video-translate/translate` body has migrated from camelCase to snake_case. It needs to unify all requests and responses body. Now, it's available if you set "X-Use-Snake-Case": "Yes" to headers, but in the next major release support for camelCase will be removed
 - Added support get yandex subtitles
 - Added `logToFile` option to config (default: false)
 - Added `forcePathStyle` option to config (default: false)
