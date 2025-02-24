@@ -1,6 +1,5 @@
 import { RequestLang, ResponseLang } from "@vot.js/shared/types/data";
 import { VideoService } from "@vot.js/core/types/service";
-import { type TranslationProvider } from "@/models/translation.model";
 
 export const translatedServices = [
   VideoService.reddit,
@@ -12,7 +11,10 @@ export const translatedServices = [
   "mux",
   "artstation",
 ] as const;
+export const translationProviders = ["yandex"] as const;
+
 export type TranslatedService = (typeof translatedServices)[number];
+export type TranslationProvider = (typeof translationProviders)[number];
 
 export type TranslationJobOpts = {
   hasOldTranslation: boolean;

@@ -1,19 +1,8 @@
 import Elysia, { t, Static } from "elysia";
 
-import { availableLangs, availableTTS } from "@vot.js/shared/consts";
-
 import { translatedServices } from "@/types/translation";
-import { Navigation } from "./core.model";
-import { StringsToLiterals } from "@/libs/utils";
-
-export const FromLang = t.Union(StringsToLiterals(availableLangs));
-export type FromLang = Static<typeof FromLang>;
-
-export const ToLang = t.Union(StringsToLiterals(availableTTS));
-export type ToLang = Static<typeof ToLang>;
-
-export const TranslatedService = t.Union(StringsToLiterals(translatedServices));
-export type TranslatedService = Static<typeof TranslatedService>;
+import { Navigation, NavigationParams } from "./core.model";
+import { VideoId, TranslationProvider, TranslatedService, ToLang, FromLang } from "./shared.model";
 
 export const TranslationStatus = t.Union(
   [t.Literal("success"), t.Literal("waiting"), t.Literal("parted"), t.Literal("failed")],
@@ -23,15 +12,6 @@ export const TranslationStatus = t.Union(
   },
 );
 export type TranslationStatus = Static<typeof TranslationStatus>;
-
-export const TranslationProvider = t.Union([t.Literal("yandex")], {
-  description: "The provider that makes the translate",
-  examples: ["yandex"],
-});
-export type TranslationProvider = Static<typeof TranslationProvider>;
-
-export const VideoId = t.Union([t.String(), t.Number()]);
-export type VideoId = Static<typeof VideoId>;
 
 export const Message = t.Nullable(
   t.String({
@@ -107,11 +87,7 @@ export const videoTranslationModels = new Elysia().model({
       message: Message,
     }),
   ]),
-  "video-translation.list.query": t.Object({
-    // min/max validation for number doesn't work (???)
-    page: t.Optional(t.Number()),
-    limit: t.Optional(t.Number()),
-  }),
+  "video-translation.list.query": NavigationParams,
   "video-translation.list.response": t.Object({
     translations: t.Array(Translation),
     navigation: Navigation,
