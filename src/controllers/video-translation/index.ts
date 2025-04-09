@@ -1,53 +1,15 @@
 import { Elysia, t } from "elysia";
 
-import {
-  TranslateRequestBody,
-  TranslateRequestBodyOld,
-  videoTranslationModels,
-} from "@/models/translation.model";
+import { videoTranslationModels } from "@/models/translation.model";
 import { coreModels } from "@/models/core.model";
 import { translationQueue } from "@/worker";
-import TranslationFacade from "@/facades/translation";
+import { translationFacade } from "@/facades/translation";
 import config from "@/config";
 import { generatePreSigned, deleteFile, massDeleteFiles } from "@/s3/actions";
 import { validateAuthToken } from "@/libs/security";
 import { getNavigationData, validateNavigation } from "@/libs/navigation";
 import { chunks, isValidId } from "@/libs/utils";
 import { TranslationNotFound } from "@/errors";
-
-const isOldRequestBody = (body: TranslateRequestBody): body is TranslateRequestBodyOld =>
-  Object.hasOwn(body, "videoId");
-
-const parseTranslateBody = (body: TranslateRequestBody) => {
-  if (isOldRequestBody(body)) {
-    const { service, provider, videoId, fromLang, toLang, rawVideo } = body;
-    return {
-      service,
-      provider,
-      videoId,
-      fromLang,
-      toLang,
-      rawVideo,
-    };
-  }
-
-  const {
-    service,
-    provider,
-    video_id: videoId,
-    from_lang: fromLang,
-    to_lang: toLang,
-    raw_video: rawVideo,
-  } = body;
-  return {
-    service,
-    provider,
-    videoId,
-    fromLang,
-    toLang,
-    rawVideo,
-  };
-};
 
 export default new Elysia({
   detail: {
@@ -59,11 +21,17 @@ export default new Elysia({
     .use(videoTranslationModels)
     .post(
       "/translate",
-      async ({ body, headers }) => {
-        const { service, provider, videoId, fromLang, toLang, rawVideo } = parseTranslateBody(body);
-        const useSnakeCase = headers?.["x-use-snake-case"] === "Yes";
+      async ({ body }) => {
+        const {
+          service,
+          provider,
+          video_id: videoId,
+          from_lang: fromLang,
+          to_lang: toLang,
+          raw_video: rawVideo,
+        } = body;
         const video_id = videoId.toString();
-        const translation = await new TranslationFacade().get({
+        const translation = await translationFacade.get({
           service,
           video_id,
           provider,
@@ -81,23 +49,14 @@ export default new Elysia({
           const translatedUrl = translated_url
             ? await generatePreSigned(translated_url)
             : translated_url;
-          return useSnakeCase
-            ? {
-                id,
-                status: translationStatus,
-                provider,
-                translated_url: translatedUrl,
-                message,
-                created_at: created_at,
-              }
-            : {
-                id,
-                status: translationStatus,
-                provider,
-                translatedUrl,
-                message,
-                createdAt: created_at,
-              };
+          return {
+            id,
+            status: translationStatus,
+            provider,
+            translated_url: translatedUrl,
+            message,
+            created_at: created_at,
+          };
         }
 
         if (!translation || isOutdated) {
@@ -132,21 +91,14 @@ export default new Elysia({
 
         const message = translation?.message ?? "Подготавливаем перевод";
         const remainingTime = translation?.remaining_time ?? -1;
-        return useSnakeCase
-          ? {
-              status: "waiting",
-              remaining_time: remainingTime,
-              message,
-            }
-          : {
-              status: "waiting",
-              remainingTime,
-              message,
-            };
+        return {
+          status: "waiting",
+          remaining_time: remainingTime,
+          message,
+        };
       },
       {
         body: "video-translation.translate.body",
-        headers: "video-translation.translate.headers",
         response: {
           200: "video-translation.translate.response",
         },
@@ -178,7 +130,6 @@ export default new Elysia({
               let offset;
               ({ page, limit, offset } = validateNavigation(page, limit));
 
-              const translationFacade = new TranslationFacade();
               const translations = await translationFacade.getAll({}, offset, limit);
               const totalTranslations = await translationFacade.getTotal();
               const navigation = getNavigationData(page, totalTranslations, limit);
@@ -202,7 +153,7 @@ export default new Elysia({
                 throw new TranslationNotFound();
               }
 
-              const translation = await new TranslationFacade().getById(id);
+              const translation = await translationFacade.getById(id);
               if (!translation) {
                 throw new TranslationNotFound();
               }
@@ -227,7 +178,7 @@ export default new Elysia({
                 throw new TranslationNotFound();
               }
 
-              const translation = await new TranslationFacade().deleteById(id);
+              const translation = await translationFacade.deleteById(id);
               if (!translation) {
                 throw new TranslationNotFound();
               }
@@ -251,12 +202,12 @@ export default new Elysia({
           )
           .delete(
             "/translate",
-            async ({ body: { service, status, toLang, fromLang, provider, created_before } }) => {
-              const translations = await new TranslationFacade().massDelete({
+            async ({ body: { service, status, to_lang, from_lang, provider, created_before } }) => {
+              const translations = await translationFacade.massDelete({
                 service,
                 status,
-                lang_to: toLang,
-                lang_from: fromLang,
+                lang_to: to_lang,
+                lang_from: from_lang,
                 provider,
                 created_before,
               });

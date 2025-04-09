@@ -55,24 +55,7 @@ export const Translation = t.Object({
   created_at: t.Date(),
 });
 
-export const TranslateRequestBodyOld = t.Object({
-  // remove this object after some time
-  service: TranslatedService,
-  videoId: VideoId,
-  fromLang: FromLang,
-  toLang: ToLang,
-  rawVideo: t.Optional(
-    t.String({
-      format: "uri",
-      pattern: "^https://*",
-      minLength: 12,
-    }),
-  ),
-  provider: TranslationProvider,
-});
-export type TranslateRequestBodyOld = Static<typeof TranslateRequestBodyOld>;
-
-export const TranslateRequestBodyNew = t.Object({
+export const TranslateRequestBody = t.Object({
   // remove this object after some time
   service: TranslatedService,
   video_id: VideoId,
@@ -87,29 +70,9 @@ export const TranslateRequestBodyNew = t.Object({
   ),
   provider: TranslationProvider,
 });
-export type TranslateRequestBodyNew = Static<typeof TranslateRequestBodyNew>;
-
-export const TranslateRequestBody = t.Union([TranslateRequestBodyOld, TranslateRequestBodyNew]);
 export type TranslateRequestBody = Static<typeof TranslateRequestBody>;
 
-export const TranslateResponseBodyOldFinished = t.Object({
-  id: t.Number(),
-  status: TranslationStatus,
-  provider: TranslationProvider,
-  translatedUrl: TranslatedUrl,
-  message: Message,
-  createdAt: t.Date(),
-});
-
-export const TranslateResponseBodyOldWaiting = t.Object({
-  status: t.Literal("waiting", {
-    examples: ["waiting"],
-  }),
-  remainingTime: RemainingTime,
-  message: Message,
-});
-
-export const TranslateResponseBodyNewFinished = t.Object({
+export const TranslateResponseBodyFinished = t.Object({
   id: t.Number(),
   status: TranslationStatus,
   provider: TranslationProvider,
@@ -118,7 +81,7 @@ export const TranslateResponseBodyNewFinished = t.Object({
   created_at: t.Date(),
 });
 
-export const TranslateResponseBodyNewWaiting = t.Object({
+export const TranslateResponseBodyWaiting = t.Object({
   status: t.Literal("waiting", {
     examples: ["waiting"],
   }),
@@ -127,20 +90,13 @@ export const TranslateResponseBodyNewWaiting = t.Object({
 });
 
 export const TranslateResponseBody = t.Union([
-  TranslateResponseBodyOldFinished,
-  TranslateResponseBodyOldWaiting,
-  TranslateResponseBodyNewFinished,
-  TranslateResponseBodyNewWaiting,
+  TranslateResponseBodyFinished,
+  TranslateResponseBodyWaiting,
 ]);
 export type TranslateResponseBody = Static<typeof TranslateResponseBody>;
 
-export const TranslateRequestHeaders = t.Object({
-  "x-use-snake-case": t.Optional(t.Union([t.Literal("Yes"), t.Literal("No")])),
-});
-
 export const videoTranslationModels = new Elysia().model({
   "video-translation.translate.body": TranslateRequestBody,
-  "video-translation.translate.headers": TranslateRequestHeaders,
   "video-translation.translate.response": TranslateResponseBody,
   "video-translation.list.query": NavigationParams,
   "video-translation.list.response": t.Object({
@@ -164,8 +120,8 @@ export const videoTranslationModels = new Elysia().model({
     service: TranslatedService,
     status: t.Optional(TranslationStatus),
     provider: t.Optional(TranslationProvider),
-    fromLang: t.Optional(FromLang),
-    toLang: t.Optional(ToLang),
+    from_lang: t.Optional(FromLang),
+    to_lang: t.Optional(ToLang),
     created_before: t.Optional(t.Date()),
   }),
   "video-translation.mass-delete.response": t.Object({
