@@ -1,5 +1,3 @@
-import fs from "node:fs/promises";
-
 import { Elysia } from "elysia";
 import { swagger } from "@elysiajs/swagger";
 import { HttpStatusCode } from "elysia-http-status-code";
@@ -19,11 +17,6 @@ import {
   TranslationNotFound,
   SubtitleNotFound,
 } from "@/errors";
-
-if (config.logging.logToFile && !(await fs.exists(config.logging.logPath))) {
-  await fs.mkdir(config.logging.logPath, { recursive: true });
-  log.info(`Created log directory`);
-}
 
 const app = new Elysia({ prefix: "/v1" })
   .use(
