@@ -168,3 +168,5 @@ export default class TranslationRepository extends BaseRepository {
     return await query.returningAll().execute();
   }
 }
+
+export const translationRepository = new TranslationRepository();

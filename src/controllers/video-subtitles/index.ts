@@ -2,7 +2,7 @@ import { Elysia, t } from "elysia";
 
 import { coreModels } from "@/models/core.model";
 import { videoSubtitleModels } from "@/models/subtitle.model";
-import SubtitleFacade from "@/facades/subtitle";
+import { subtitleFacade } from "@/facades/subtitle";
 import { deleteFile, generatePreSigned, massDeleteFiles } from "@/s3/actions";
 import { validateAuthToken } from "@/libs/security";
 import { getNavigationData, validateNavigation } from "@/libs/navigation";
@@ -20,7 +20,7 @@ export default new Elysia({
     .post(
       "/get-subtitles",
       async ({ body: { service, video_id, provider } }) => {
-        const subtitles = await new SubtitleFacade().get({
+        const subtitles = await subtitleFacade.get({
           service,
           video_id: video_id.toString(),
           provider,
@@ -73,7 +73,6 @@ export default new Elysia({
               let offset;
               ({ page, limit, offset } = validateNavigation(page, limit));
 
-              const subtitleFacade = new SubtitleFacade();
               const subtitles = await subtitleFacade.getAll({}, offset, limit);
               const totatSubtitles = await subtitleFacade.getTotal();
               const navigation = getNavigationData(page, totatSubtitles, limit);
@@ -97,7 +96,7 @@ export default new Elysia({
                 throw new SubtitleNotFound();
               }
 
-              const subtitle = await new SubtitleFacade().getById(id);
+              const subtitle = await subtitleFacade.getById(id);
               if (!subtitle) {
                 throw new SubtitleNotFound();
               }
@@ -122,7 +121,7 @@ export default new Elysia({
                 throw new SubtitleNotFound();
               }
 
-              const subtitle = await new SubtitleFacade().deleteById(id);
+              const subtitle = await subtitleFacade.deleteById(id);
               if (!subtitle) {
                 throw new SubtitleNotFound();
               }
@@ -147,7 +146,7 @@ export default new Elysia({
           .delete(
             "/subtitle",
             async ({ body: { service, lang, fromLang, provider, created_before } }) => {
-              const subtitles = await new SubtitleFacade().massDelete({
+              const subtitles = await subtitleFacade.massDelete({
                 service,
                 lang,
                 lang_from: fromLang,

@@ -1,5 +1,9 @@
-import TranslationCacheRepository from "@/cache/repositories/translation";
-import TranslationDBRepository from "@/database/repositories/translation";
+import TranslationCacheRepository, {
+  translationRepository as translationCacheRepository,
+} from "@/cache/repositories/translation";
+import TranslationDBRepository, {
+  translationRepository as translationDBRepository,
+} from "@/database/repositories/translation";
 import {
   GetTranslationOpts,
   MassDeleteTranslationOpts,
@@ -14,7 +18,7 @@ export default class TranslationFacade extends BaseFacade<
   TranslationDBRepository
 > {
   constructor() {
-    super(new TranslationCacheRepository(), new TranslationDBRepository());
+    super(translationCacheRepository, translationDBRepository);
   }
 
   async get(getBy: GetTranslationOpts): Promise<Translation | undefined> {
@@ -128,3 +132,5 @@ export default class TranslationFacade extends BaseFacade<
     return results as Translation[] | undefined;
   }
 }
+
+export const translationFacade = new TranslationFacade();

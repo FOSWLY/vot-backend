@@ -1,5 +1,9 @@
-import SubtitleCacheRepository from "@/cache/repositories/subtitle";
-import SubtitleDBRepository from "@/database/repositories/subtitle";
+import SubtitleCacheRepository, {
+  subtitleRepository as subtitleCacheRepository,
+} from "@/cache/repositories/subtitle";
+import SubtitleDBRepository, {
+  subtitleRepository as subtitleDBRepository,
+} from "@/database/repositories/subtitle";
 import {
   GetSubtitleOpts,
   MassDeleteSubtitleOpts,
@@ -14,7 +18,7 @@ export default class SubtitleFacade extends BaseFacade<
   SubtitleDBRepository
 > {
   constructor() {
-    super(new SubtitleCacheRepository(), new SubtitleDBRepository());
+    super(subtitleCacheRepository, subtitleDBRepository);
   }
 
   async get(getBy: GetSubtitleOpts): Promise<Subtitle[]> {
@@ -23,7 +27,7 @@ export default class SubtitleFacade extends BaseFacade<
       return cached;
     }
 
-    const results = (await this.dbRepository.get(getBy)) as Subtitle[];
+    const results = await this.dbRepository.get(getBy);
     await Promise.allSettled(
       results.map(async (result) => await this.cacheRepository.create(result)),
     );
@@ -37,7 +41,7 @@ export default class SubtitleFacade extends BaseFacade<
       return cached;
     }
 
-    const result = (await this.dbRepository.getById(id)) as Subtitle | undefined;
+    const result = await this.dbRepository.getById(id);
     if (result) {
       await this.cacheRepository.create(result);
     }
@@ -47,7 +51,7 @@ export default class SubtitleFacade extends BaseFacade<
 
   async getAll(criteria: Partial<Subtitle>, offset = 0, limit = 10): Promise<Subtitle[]> {
     // !!! not cached
-    return (await this.dbRepository.getAll(criteria, offset, limit)) as Subtitle[];
+    return await this.dbRepository.getAll(criteria, offset, limit);
   }
 
   async getTotal() {
@@ -82,7 +86,7 @@ export default class SubtitleFacade extends BaseFacade<
   }
 
   async deleteById(id: number): Promise<Subtitle | undefined> {
-    const result = (await this.dbRepository.deleteById(id)) as Subtitle | undefined;
+    const result = await this.dbRepository.deleteById(id);
     if (!result) {
       return;
     }
@@ -106,3 +110,5 @@ export default class SubtitleFacade extends BaseFacade<
     return results;
   }
 }
+
+export const subtitleFacade = new SubtitleFacade();

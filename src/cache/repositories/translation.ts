@@ -28,7 +28,7 @@ export default class TranslationRepository extends BaseRepository {
     provider,
     lang_from,
     lang_to,
-  }: GetTranslationOpts): Promise<undefined | Translation> {
+  }: GetTranslationOpts): Promise<Translation | undefined> {
     const result = await cache.hget(
       this.getKey(service),
       this.getField(video_id, provider, lang_from, lang_to),
@@ -41,7 +41,7 @@ export default class TranslationRepository extends BaseRepository {
     criteria: Partial<Translation> = {},
     offset = 0,
     limit = config.navigation.defaultLimit,
-  ) {
+  ): Promise<Translation[]> {
     let services: TranslatedService[] = translatedServices as unknown as TranslatedService[];
     if (criteria.service) {
       services = services.filter((service) => service === criteria.service);
@@ -116,3 +116,5 @@ export default class TranslationRepository extends BaseRepository {
     );
   }
 }
+
+export const translationRepository = new TranslationRepository();

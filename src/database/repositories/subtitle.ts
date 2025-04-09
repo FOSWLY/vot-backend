@@ -14,7 +14,7 @@ export default class SubtitleRepository extends BaseRepository {
     super("vot_subtitles");
   }
 
-  async get({ service, video_id, provider }: GetSubtitleOpts) {
+  async get({ service, video_id, provider }: GetSubtitleOpts): Promise<Subtitle[]> {
     const query = db
       .selectFrom(this.dbName)
       .where("service", "=", service)
@@ -24,7 +24,7 @@ export default class SubtitleRepository extends BaseRepository {
     return await query.selectAll().execute();
   }
 
-  async getById(id: number) {
+  async getById(id: number): Promise<Subtitle | undefined> {
     const query = db.selectFrom(this.dbName).where("id", "=", id);
 
     return await query.selectAll().executeTakeFirst();
@@ -34,7 +34,7 @@ export default class SubtitleRepository extends BaseRepository {
     criteria: Partial<Subtitle> = {},
     offset = 0,
     limit = config.navigation.defaultLimit,
-  ) {
+  ): Promise<Subtitle[]> {
     let query = db.selectFrom(this.dbName);
     if (criteria.id) {
       query = query.where("id", "=", criteria.id); // Kysely is immutable, you must re-assign!
@@ -95,18 +95,14 @@ export default class SubtitleRepository extends BaseRepository {
   }
 
   async create(subtitle: NewSubtitle) {
-    return await db
-      .insertInto(this.dbName)
-      .values(subtitle)
-      .returningAll()
-      .executeTakeFirstOrThrow();
+    return await db.insertInto(this.dbName).values(subtitle).returningAll().executeTakeFirst();
   }
 
-  async deleteById(id: number) {
+  async deleteById(id: number): Promise<Subtitle | undefined> {
     return await db.deleteFrom(this.dbName).where("id", "=", id).returningAll().executeTakeFirst();
   }
 
-  async massDelete(criteria: Partial<MassDeleteSubtitleOpts> = {}) {
+  async massDelete(criteria: Partial<MassDeleteSubtitleOpts> = {}): Promise<Subtitle[]> {
     let query = db.deleteFrom(this.dbName);
     if (criteria.service) {
       query = query.where("service", "=", criteria.service);
@@ -131,3 +127,5 @@ export default class SubtitleRepository extends BaseRepository {
     return await query.returningAll().execute();
   }
 }
+
+export const subtitleRepository = new SubtitleRepository();

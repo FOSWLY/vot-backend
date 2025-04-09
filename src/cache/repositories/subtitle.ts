@@ -24,7 +24,7 @@ export default class SubtitleRepository extends BaseRepository {
     criteria: Partial<Subtitle> = {},
     offset = 0,
     limit = config.navigation.defaultLimit,
-  ) {
+  ): Promise<Subtitle[]> {
     let services: TranslatedService[] = translatedServices as unknown as TranslatedService[];
     if (criteria.service) {
       services = services.filter((service) => service === criteria.service);
@@ -96,3 +96,5 @@ export default class SubtitleRepository extends BaseRepository {
     return await cache.hdel(this.getKey(service), String(id));
   }
 }
+
+export const subtitleRepository = new SubtitleRepository();
