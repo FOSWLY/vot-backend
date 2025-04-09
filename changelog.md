@@ -1,3 +1,10 @@
+# 1.3.2
+
+- Removed camelCase support and "X-Use-Snake-Case" header in `POST /video-translation/translate` and `DELETE /video-translation/translate`
+- Init new Repositories replaced with exports as global vars
+- Logger `pino` replaced to `@vaylo/pino`
+- Bump depends
+
 # 1.3.1
 
 - Renamed `videoId` field to `video_id` in `POST video-subtitles/get-subtitles` body
