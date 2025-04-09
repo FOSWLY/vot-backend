@@ -37,13 +37,6 @@ const services: ServiceData = {
     helper: getPlaylist,
     skipExt: true,
   },
-  nineanimetv: {
-    match: [
-      /^.*\.betterstream\.cc$/, // wildcard
-      /^.*\.biananset\.net$/, // wildcard
-    ],
-    from: "m3u8",
-  },
 };
 
 export default async function extractVideo(service: TranslatedService, rawVideo = "") {

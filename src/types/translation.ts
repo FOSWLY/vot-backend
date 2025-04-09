@@ -7,7 +7,6 @@ export const translatedServices = [
   VideoService.kick,
   VideoService.apple_developer,
   VideoService.epicgames,
-  VideoService.nineanimetv,
   "mux",
   "artstation",
 ] as const;
