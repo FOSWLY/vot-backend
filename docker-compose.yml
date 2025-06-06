@@ -64,13 +64,34 @@ services:
       interval: 5s
       retries: 20
 
+  migrator:
+    build:
+      context: .
+      target: migrator
+    container_name: vot-migrator
+    networks:
+      - vot-net
+    environment:
+      POSTGRES_NAME: vot-backend
+      POSTGRES_HOST: db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
   vot-backend:
-    build: .
+    build:
+      context: .
+      target: final
     container_name: vot-backend
     restart: always
     ports:
       - "3001:3001"
     depends_on:
+      migrator:
+        condition: service_completed_successfully
       db:
         condition: service_healthy
       redis:
@@ -86,6 +107,7 @@ services:
       MEDIA_CONVERTER_HOSTNAME: http://localhost:3000
       MEDIA_CONVERTER_TOKEN: x
       TRANSLATE_TEXT_HOSTNAME: https://translate.toil.cc
+      # VOT_WORKER_API_TOKEN:
       S3_REGION: eu-central-1
       S3_ENDPOINT: http://minio:9000
       S3_PRESIGNED_ENDPOINT: http://127.0.0.1:9000
