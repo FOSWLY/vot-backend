@@ -1,0 +1,14 @@
+{
+  "categories": {
+    "correctness": "error",
+    "perf": "error",
+    "suspicious": "warn"
+  },
+  "rules": {
+    "no-await-in-loop": "off",
+    "no-extraneous-class": "off",
+    "no-named-as-default": "off"
+  },
+  "ignorePatterns": ["scripts"],
+  "plugins": ["promise", "import", "eslint", "oxc", "typescript", "unicorn"]
+}
