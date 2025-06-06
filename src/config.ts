@@ -34,6 +34,10 @@ export default Value.Parse(ConfigSchema, {
     translateText: {
       hostname: Bun.env.TRANSLATE_TEXT_HOSTNAME,
     },
+    votWorker: {
+      hostname: Bun.env.VOT_WORKER_HOSTNAME,
+      apiToken: Bun.env.VOT_WORKER_API_TOKEN,
+    },
   },
   db: {
     name: Bun.env.POSTGRES_NAME,

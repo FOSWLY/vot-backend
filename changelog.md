@@ -1,6 +1,23 @@
+# 1.3.3
+
+## Backend
+
+- Added support DeeplearningAI
+- Added support `VOT_WORKER_HOSTNAME` environment variable for set vot-worker host
+- Added new provider `yandex_lively` for support lively voice feature (needs `VOT_WORKER_API_TOKEN` environment variable). Only `en` -> `ru` translation is supported
+- Parial migrated to Bun S3 API
+
+## Workspace
+
+- Added new oxlint config
+- Improved Docker logic
+- Removed test script `s3:init-minio` in package.json
+- Removed `eslint-plugin-oxlint`
+- Bump depends
+
 # 1.3.2
 
-- Removed camelCase support and "X-Use-Snake-Case" header in `POST /video-translation/translate` and `DELETE /video-translation/translate`
+- (!) Removed camelCase support and "X-Use-Snake-Case" header in `POST /video-translation/translate` and `DELETE /video-translation/translate`
 - Init new Repositories replaced with exports as global vars
 - Logger `pino` replaced to `@vaylo/pino`
 - Bump depends

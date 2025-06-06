@@ -1,3 +1,4 @@
+// eslint-disable prefer-set-has
 import { VOTWorkerClient } from "@vot.js/node";
 import { getVideoData } from "@vot.js/node/utils/videoData";
 import { TranslationHelp, TranslatedVideoTranslationResponse } from "@vot.js/core/types/yandex";
@@ -23,6 +24,10 @@ import { TranslationJobOpts, TranslationProgress } from "@/types/translation";
 import { fetchWithTimeout } from "@/libs/network";
 import SubtitleFacade from "@/facades/subtitle";
 import { VideoService } from "@vot.js/core/types/service";
+import config from "@/config";
+
+const { hostname, apiToken } = config.services.votWorker;
+const hasAPIToken = !!apiToken;
 
 function isSuccessMediaRes(mediaRes: ConverterResponse | null): mediaRes is ConverterFinalResponse {
   return !(
@@ -46,6 +51,7 @@ export default abstract class TranslationJob {
     client: VOTWorkerClient,
     job: Job<TranslationJobOpts>,
     videoData: VideoData,
+    useLivelyVoice = false,
     timer: ReturnType<typeof setTimeout> | undefined = undefined,
     translationHelp: TranslationHelp[] | null = null,
   ): Promise<TranslatedVideoTranslationResponse> {
@@ -53,6 +59,9 @@ export default abstract class TranslationJob {
     const res = await client.translateVideo({
       videoData,
       translationHelp,
+      extraOpts: {
+        useLivelyVoice,
+      },
     });
 
     await job.updateData({
@@ -72,7 +81,14 @@ export default abstract class TranslationJob {
       timer = setTimeout(async () => {
         try {
           resolve(
-            await TranslationJob.translateVideoImpl(client, job, videoData, timer, translationHelp),
+            await TranslationJob.translateVideoImpl(
+              client,
+              job,
+              videoData,
+              useLivelyVoice,
+              timer,
+              translationHelp,
+            ),
           );
         } catch (err) {
           // bullmq can't prevent timed out errors
@@ -140,11 +156,33 @@ export default abstract class TranslationJob {
     const client = new VOTWorkerClient({
       requestLang: fromLang,
       responseLang: toLang,
+      host: hostname,
+      apiToken,
     });
 
     // в случае ошибки сразу падает в onError, поэтому обрабатывать не нужно
     const videoData = await getVideoData(mediaRes.download_url);
-    const translateRes = await TranslationJob.translateVideoImpl(client, job, videoData);
+    const useLivelyVoice =
+      hasAPIToken && provider === "yandex_lively" && fromLang === "en" && toLang === "ru";
+    console.log(
+      "use lively",
+      useLivelyVoice,
+      "HAS TOKEN",
+      hasAPIToken,
+      "from",
+      fromLang,
+      "to",
+      toLang,
+      "provider",
+      provider,
+    );
+
+    const translateRes = await TranslationJob.translateVideoImpl(
+      client,
+      job,
+      videoData,
+      useLivelyVoice,
+    );
     await job.updateProgress(TranslationProgress.DOWNLOAD_TRANSLATION);
 
     const path = await TranslationJob.uploadFile(

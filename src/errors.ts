@@ -14,7 +14,7 @@ export class InternalServerError extends Error {
 
 export class MissingRawVideoField extends Error {
   constructor(service: TranslatedService) {
-    super(`To translate videos from ${service}, you must specify the "rawVideo" field`);
+    super(`To translate videos from ${service}, you must specify the "raw_video" field`);
   }
 }
 

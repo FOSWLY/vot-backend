@@ -9,6 +9,8 @@ declare module "bun" {
     MEDIA_CONVERTER_HOSTNAME: string;
     MEDIA_CONVERTER_TOKEN: string;
     TRANSLATE_TEXT_HOSTNAME: string;
+    VOT_WORKER_HOSTNAME: string;
+    VOT_WORKER_API_TOKEN: string | undefined;
     POSTGRES_NAME: string;
     POSTGRES_HOST: string;
     POSTGRES_PORT: number;

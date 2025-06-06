@@ -63,6 +63,10 @@ export const ConfigSchema = t.Object({
     translateText: t.Object({
       hostname: t.String({ default: "http://127.0.0.1:3313" }),
     }),
+    votWorker: t.Object({
+      hostname: t.String({ default: "https://vot-worker.toil.cc" }),
+      apiToken: t.Optional(t.String()),
+    }),
   }),
   db: t.Object({
     name: t.String({ default: "vot-backend" }),

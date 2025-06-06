@@ -47,6 +47,12 @@ db:
     POSTGRES_DB: vot-backend # <-- имя бд по умолчанию (не трогайте, если вы не уверены в том, что делаете)
     POSTGRES_USER: postgres # <-- имя пользователя по умолчанию
     POSTGRES_PASSWORD: mysecretpassword # <-- пароль пользователя (поменяйте его)
+migrator:
+ ...
+  environment:
+    POSTGRES_DB: vot-backend # <-- имя бд по умолчанию (не трогайте, если вы не уверены в том, что делаете)
+    POSTGRES_USER: postgres # <-- имя пользователя по умолчанию
+    POSTGRES_PASSWORD: mysecretpassword # <-- пароль пользователя (поменяйте его)
 vot-backend:
   ...
   environment:
@@ -54,6 +60,7 @@ vot-backend:
     MEDIA_CONVERTER_HOSTNAME: http://localhost:3001 # <-- путь до вашего экземпляра media-converter (вы же уже засельфхостили его?)
     MEDIA_CONVERTER_TOKEN: x # <-- токен используемый для доступа к media-converter
     TRANSLATE_TEXT_HOSTNAME: https://translate.toil.cc # <-- путь до экземпляра перевода текста (лучше засельфхостите свой экземпляр, а не используйте публичный. Спасибо за понимание)
+    # VOT_WORKER_API_TOKEN: <-- yandex oauth token для поддержки живых голосов
     S3_REGION: eu-central-1 # <-- регион S3
     S3_ENDPOINT: http://minio:9000 # <-- ссылка для доступа к S3
     S3_PRESIGNED_ENDPOINT: http://127.0.0.1:9000 # <-- ссылка для внешнего доступа к S3 (по которой пользователь будет получать файлы)
