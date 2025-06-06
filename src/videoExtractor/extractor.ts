@@ -37,6 +37,10 @@ const services: ServiceData = {
     helper: getPlaylist,
     skipExt: true,
   },
+  deeplearningai: {
+    match: "dyckms5inbsqq.cloudfront.net",
+    from: "m3u8",
+  },
 };
 
 export default async function extractVideo(service: TranslatedService, rawVideo = "") {
