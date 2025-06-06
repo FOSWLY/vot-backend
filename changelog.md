@@ -5,7 +5,7 @@
 - Added support DeeplearningAI
 - Added support `VOT_WORKER_HOSTNAME` environment variable for set vot-worker host
 - Added new provider `yandex_lively` for support lively voice feature (needs `VOT_WORKER_API_TOKEN` environment variable). Only `en` -> `ru` translation is supported
-- Parial migrated to Bun S3 API
+- Partial migration to Bun S3 API
 
 ## Workspace
 
