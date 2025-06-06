@@ -26,17 +26,15 @@ export default new Elysia({
           provider,
         });
 
-        const subtitlesWithPreSigned = await Promise.all(
-          subtitles.map(async (subtitle) => {
-            const url = await generatePreSigned(subtitle.subtitle_url);
-            if (!url) {
-              return false;
-            }
+        const subtitlesWithPreSigned = subtitles.map((subtitle) => {
+          const url = generatePreSigned(subtitle.subtitle_url);
+          if (!url) {
+            return false;
+          }
 
-            subtitle.subtitle_url = url;
-            return subtitle;
-          }),
-        );
+          subtitle.subtitle_url = url;
+          return subtitle;
+        });
 
         return subtitlesWithPreSigned.filter((subtitle) => subtitle !== false);
       },
@@ -70,7 +68,7 @@ export default new Elysia({
           .get(
             "/list",
             async ({ query: { page, limit } }) => {
-              let offset;
+              let offset: number | undefined;
               ({ page, limit, offset } = validateNavigation(page, limit));
 
               const subtitles = await subtitleFacade.getAll({}, offset, limit);

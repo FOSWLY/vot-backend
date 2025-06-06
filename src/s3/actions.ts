@@ -1,12 +1,6 @@
-import {
-  GetObjectCommand,
-  PutObjectCommand,
-  DeleteObjectCommand,
-  DeleteObjectsCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
 
-import s3client, { s3PreSignedClient } from "./s3";
+import s3client, { s3DeprecatedClient, s3PreSignedClient } from "./s3";
 import { log } from "@/logging";
 import config from "@/config";
 
@@ -18,20 +12,16 @@ export async function saveFile(
   contentType = "application/mpeg",
 ) {
   try {
-    const results = await s3client.send(
-      new PutObjectCommand({
-        Bucket: bucket,
-        Key: filename,
-        Body: body,
-        ContentType: contentType,
-      }),
-    );
+    const s3file = s3client.file(filename, {
+      bucket,
+      type: contentType,
+    });
+
+    const bytes = await s3file.write(body);
 
     log.debug(`Successfully created ${filename} and uploaded it to ${bucket} bucket`);
     return {
-      statusCode: results.$metadata.httpStatusCode,
-      success: results.$metadata.httpStatusCode === 200,
-      etag: results.ETag,
+      success: bytes !== 0,
     };
   } catch (err) {
     const message = (err as Error).message;
@@ -50,17 +40,13 @@ export async function saveFile(
 
 export async function deleteFile(filename: string) {
   try {
-    const results = await s3client.send(
-      new DeleteObjectCommand({
-        Bucket: bucket,
-        Key: filename,
-      }),
-    );
+    await s3client.delete(filename, {
+      bucket,
+    });
 
     log.debug(`Successfully deleted ${filename} from ${bucket} bucket`);
     return {
-      statusCode: results.$metadata.httpStatusCode,
-      success: results.$metadata.httpStatusCode === 204,
+      success: true,
     };
   } catch (err) {
     const message = (err as Error).message;
@@ -82,7 +68,7 @@ export async function deleteFile(filename: string) {
  */
 export async function massDeleteFiles(filenames: string[]) {
   try {
-    const results = await s3client.send(
+    const results = await s3DeprecatedClient.send(
       new DeleteObjectsCommand({
         Bucket: bucket,
         Delete: {
@@ -112,13 +98,11 @@ export async function massDeleteFiles(filenames: string[]) {
   }
 }
 
-export async function generatePreSigned(filename: string) {
+export function generatePreSigned(filename: string) {
   try {
-    const command = new GetObjectCommand({ Bucket: bucket, Key: filename });
-
-    return await getSignedUrl(s3PreSignedClient, command, {
+    return s3PreSignedClient.presign(filename, {
       expiresIn: lifeTime,
-      unhoistableHeaders: new Set("x-id"),
+      bucket,
     });
   } catch (err) {
     log.error(err);

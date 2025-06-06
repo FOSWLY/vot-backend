@@ -1,12 +1,12 @@
 import { PutBucketCorsCommand } from "@aws-sdk/client-s3";
 
-import s3client from "../src/s3/s3";
+import { s3DeprecatedClient } from "../src/s3/s3";
 import config from "../src/config";
 
 const bucket = config.s3.bucket;
 
 export async function disableCors() {
-  return await s3client.send(
+  return await s3DeprecatedClient.send(
     new PutBucketCorsCommand({
       Bucket: bucket,
       CORSConfiguration: {

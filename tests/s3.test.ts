@@ -11,8 +11,8 @@ test("Audio upload", async () => {
   expect(res).not.toEqual(null);
 });
 
-test("Get pre signed", async () => {
-  const res = await generatePreSigned("vtrans/test/ae9b4d2f-abb2-421a-b2b3-4caf8fd0ed5f.mp3");
+test("Get pre signed", () => {
+  const res = generatePreSigned("vtrans/test/ae9b4d2f-abb2-421a-b2b3-4caf8fd0ed5f.mp3");
   console.log(res);
   expect(res).not.toEqual(null);
 });

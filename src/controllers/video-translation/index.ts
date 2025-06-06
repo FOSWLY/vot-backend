@@ -46,9 +46,7 @@ export default new Elysia({
             : false;
         if (translationStatus === "success" || (translationStatus === "failed" && !isOutdated)) {
           const { id, provider, translated_url, created_at, message } = translation!;
-          const translatedUrl = translated_url
-            ? await generatePreSigned(translated_url)
-            : translated_url;
+          const translatedUrl = translated_url ? generatePreSigned(translated_url) : translated_url;
           return {
             id,
             status: translationStatus,
@@ -127,7 +125,7 @@ export default new Elysia({
           .get(
             "/list",
             async ({ query: { page, limit } }) => {
-              let offset;
+              let offset: number | undefined;
               ({ page, limit, offset } = validateNavigation(page, limit));
 
               const translations = await translationFacade.getAll({}, offset, limit);
